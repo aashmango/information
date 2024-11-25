@@ -15,23 +15,34 @@ export default function Home() {
 
   useEffect(() => {
     const loadContent = async () => {
-      const [fetchedImages, fetchedTextBlocks] = await Promise.all([
-        contentService.fetchImages(),
-        contentService.fetchTextBlocks()
-      ]);
-      
-      const imagesWithPositions = fetchedImages.map(img => ({
-        ...img,
-        current_position: img.current_position || { x: 0, y: 0 }
-      }));
-      
-      const textBlocksWithPositions = fetchedTextBlocks.map(block => ({
-        ...block,
-        current_position: block.current_position || { x: 0, y: 0 }
-      }));
-      
-      setImages(imagesWithPositions);
-      setTextBlocks(textBlocksWithPositions);
+      console.log('Starting to load content...');
+      try {
+        const [fetchedImages, fetchedTextBlocks] = await Promise.all([
+          contentService.fetchImages(),
+          contentService.fetchTextBlocks()
+        ]);
+        
+        console.log('Fetched images:', fetchedImages);
+        console.log('Fetched text blocks:', fetchedTextBlocks);
+        
+        const imagesWithPositions = fetchedImages.map(img => ({
+          ...img,
+          current_position: img.current_position || { x: 0, y: 0 }
+        }));
+        
+        const textBlocksWithPositions = fetchedTextBlocks.map(block => ({
+          ...block,
+          current_position: block.current_position || { x: 0, y: 0 }
+        }));
+        
+        console.log('Processed images:', imagesWithPositions);
+        console.log('Processed text blocks:', textBlocksWithPositions);
+        
+        setImages(imagesWithPositions);
+        setTextBlocks(textBlocksWithPositions);
+      } catch (error) {
+        console.error('Error loading content:', error);
+      }
     };
 
     loadContent();

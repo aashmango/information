@@ -52,12 +52,10 @@ export interface DraggableProps {
 export interface SavePositionsPayload {
   images: Array<{
     id: string;
-    current_position_x: number;
-    current_position_y: number;
+    position: Position;
   }>;
   textBlocks: Array<{
     id: string;
-    current_position_x: number;
-    current_position_y: number;
+    position: Position;
   }>;
 }

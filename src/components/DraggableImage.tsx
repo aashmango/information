@@ -14,7 +14,7 @@ export default function DraggableImage({ image, position, onPositionChange, id }
   return (
     <Draggable
       nodeRef={nodeRef}
-      defaultPosition={localPosition}
+      position={localPosition}
       onStop={(e, data) => {
         const newPosition = { x: data.x, y: data.y };
         setLocalPosition(newPosition);
