@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ImageItem, TextBlock } from '../types';
 import { IMAGES, TEXT_BLOCKS } from '../data/content';
 import { DraggableImage } from '../components/DraggableImage';
@@ -14,7 +14,6 @@ export default function Home() {
     }))
   );
   const [isDragging, setIsDragging] = useState(false);
-  const [expandedImage, setExpandedImage] = useState<string | null>(null);
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
 
   const [textBlocks, setTextBlocks] = useState<TextBlock[]>(() => 
