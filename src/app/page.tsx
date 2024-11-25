@@ -4,7 +4,7 @@ export default function Home() {
       {/* Intro Section */}
       <section className="mt-16">
         <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-        Aashman Goghari is a designer and software developer currently working at Palantir in New York. He specializes in software for streamlining delivery, such as Palantir Apollo, and has also contributed to tools within Palantir Foundry for data integration and pipelining. Before Palantir, he worked at Formlabs, where he designed 3D-printed installations, hardware interfaces, and websites. Aashman has a background in architecture, having graduated from the Rhode Island School of Design (RISD) in 2016. He grew up in Ahmedabad and Mumbai, India.
+          Site is under construction. 
         </p>
       </section>
 
@@ -13,40 +13,12 @@ export default function Home() {
         <ul className="space-y-3">
           <li>
             <a 
-              href="https://github.com/yourusername" 
+              href="https://linkedin.com/in/aashmangoghari" 
               className="text-foreground hover:underline"
               target="_blank"
               rel="noopener noreferrer"
             >
-              → GitHub
-            </a>
-          </li>
-          <li>
-            <a 
-              href="https://twitter.com/yourusername" 
-              className="text-foreground hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              → Twitter
-            </a>
-          </li>
-          <li>
-            <a 
-              href="https://linkedin.com/in/yourusername" 
-              className="text-foreground hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              → LinkedIn
-            </a>
-          </li>
-          <li>
-            <a 
-              href="mailto:your@email.com" 
-              className="text-foreground hover:underline"
-            >
-              → Email
+            LinkedIn
             </a>
           </li>
         </ul>
