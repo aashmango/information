@@ -34,11 +34,10 @@ export const contentService = {
         ? img.current_position 
         : fallbackPosition;
 
-      const defaultPosition = (img.default_position && 
-        typeof img.default_position.x === 'number' && 
-        typeof img.default_position.y === 'number')
-        ? img.default_position
-        : currentPosition;
+      const defaultPosition = {
+        x: img.default_position_x,
+        y: img.default_position_y
+      };
 
       return {
         id: img.id,
