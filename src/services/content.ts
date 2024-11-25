@@ -103,62 +103,38 @@ export const contentService = {
 
   async savePositions(changes: SavePositionsPayload): Promise<void> {
     try {
-      console.log('Saving positions:', changes);
+      console.log('Save operation starting with payload:', JSON.stringify(changes, null, 2));
 
-      const updates = [
-        ...changes.images.map(({ id, position }) => {
-          const formattedPosition = {
-            x: Number(position.x),
-            y: Number(position.y)
-          };
-          
-          return supabase
-            .from('images')
-            .update({ current_position: formattedPosition })
-            .eq('id', id)
-            .then(({ error }) => {
-              if (error) console.error(`Failed to update image ${id}:`, error);
-              return { error };
-            });
-        }),
-        ...changes.textBlocks.map(({ id, position }) => {
-          console.log(`Preparing text update for id ${id}:`, position);
-          return supabase
-            .from('text_blocks')
-            .update({ current_position: position })
-            .eq('id', id)
-            .then(({ error }) => {
-              if (error) {
-                console.error(`Failed to update text block ${id}:`, error);
-                return { error };
-              }
-              console.log(`Successfully updated text block ${id}`);
-              return { error: null };
-            });
-        })
-      ];
+      for (const { id, position } of changes.images) {
+        console.log(`Saving image ${id}...`);
+        const { data, error, status } = await supabase  // Added status to response
+          .from('images')
+          .update({ current_position: position })
+          .eq('id', id)
+          .select('*');  // Get full record back
 
-      console.log('Executing updates...');
-      const results = await Promise.all(updates);
-      
-      results.forEach((result, index) => {
-        if (result.error) {
-          console.error(`Error updating item ${index}:`, result.error);
-        } else {
-          console.log(`Successfully updated item ${index}`);
+        console.log(`Update response for image ${id}:`, {
+          success: !error,
+          status,
+          error,
+          updatedData: data
+        });
+
+        if (error) {
+          throw new Error(`Failed to update image ${id}: ${error.message}`);
         }
-      });
-
-      const errors = results.filter(r => r.error);
-      
-      if (errors.length > 0) {
-        console.error('Errors during position updates:', errors);
-        throw new Error('Failed to save some position updates');
-      } else {
-        console.log('All positions saved successfully');
       }
+
+      // Verify the updates immediately
+      const { data: verificationData } = await supabase
+        .from('images')
+        .select('id, current_position')
+        .in('id', changes.images.map(img => img.id));
+
+      console.log('Verification of updates:', verificationData);
+
     } catch (error) {
-      console.error('Error in savePositions:', error);
+      console.error('Save operation failed:', error);
       throw error;
     }
   }
