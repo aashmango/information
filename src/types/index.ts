@@ -7,19 +7,19 @@ export interface ImageItem {
   id: string;
   src: string;
   alt: string;
-  position: Position;
-  default_position: Position;
   width: number;
   height: number;
+  default_position: Position;
+  current_position: Position;
   isExpanded?: boolean;
 }
 
 export interface TextBlock {
   id: string;
   content: string;
-  position: Position;
-  default_position: Position;
   width: number;
+  default_position: Position;
+  current_position: Position;
 }
 
 // Database types (matching your Supabase schema)

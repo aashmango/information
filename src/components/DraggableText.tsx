@@ -23,7 +23,7 @@ export default function DraggableText({
   return (
     <Draggable
       nodeRef={nodeRef}
-      position={text.position}
+      position={text.current_position}
       onStart={onDragStart}
       onStop={onDragStop}
       onDrag={(e, data) => onDrag(text.id, data.x, data.y)}

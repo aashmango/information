@@ -73,6 +73,24 @@ export default function Home() {
     ));
   };
 
+  const onImageDrag = (id: string, x: number, y: number) => {
+    const updatedImages = images.map((img) =>
+      img.id === id
+        ? { ...img, current_position: { x, y } }
+        : img
+    );
+    setImages(updatedImages);
+  };
+
+  const onTextDrag = (id: string, x: number, y: number) => {
+    const updatedTextBlocks = textBlocks.map((block) =>
+      block.id === id
+        ? { ...block, current_position: { x, y } }
+        : block
+    );
+    setTextBlocks(updatedTextBlocks);
+  };
+
   return (
     <main className="min-h-screen p-8 bg-white relative">
       <DisplayFilters
@@ -82,7 +100,7 @@ export default function Home() {
         onToggleText={setShowText}
       />
 
-      <div className="relative w-full overflow-visible">
+      <div className="relative w-full h-screen overflow-hidden">
         {showImages && images.map((image) => (
           <DraggableImage
             key={image.id}
@@ -91,14 +109,7 @@ export default function Home() {
             hoveredImage={hoveredImage}
             onDragStart={() => setIsDragging(true)}
             onDragStop={() => setIsDragging(false)}
-            onDrag={(id, x, y) => {
-              const updatedImages = images.map((img) =>
-                img.id === id
-                  ? { ...img, position: { x, y } }
-                  : img
-              );
-              setImages(updatedImages);
-            }}
+            onDrag={onImageDrag}
             onHover={setHoveredImage}
             toggleExpand={toggleExpand}
           />
@@ -111,14 +122,7 @@ export default function Home() {
             isDragging={isDragging}
             onDragStart={() => setIsDragging(true)}
             onDragStop={() => setIsDragging(false)}
-            onDrag={(id, x, y) => {
-              const updatedTextBlocks = textBlocks.map((block) =>
-                block.id === id
-                  ? { ...block, position: { x, y } }
-                  : block
-              );
-              setTextBlocks(updatedTextBlocks);
-            }}
+            onDrag={onTextDrag}
           />
         ))}
       </div>

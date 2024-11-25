@@ -27,27 +27,28 @@ export function DraggableImage({
 }: DraggableImageProps) {
   const nodeRef = useRef(null);
   const scale = image.isExpanded ? 3 : 1;
+  const baseWidth = 300;
+  const baseHeight = 200;
 
   return (
     <Draggable
       nodeRef={nodeRef}
-      position={image.position}
+      position={image.current_position}
       onStart={onDragStart}
       onStop={onDragStop}
       onDrag={(e, data) => onDrag(image.id, data.x, data.y)}
     >
       <div 
         ref={nodeRef}
-        className="fixed hover:shadow-lg"
+        className="absolute hover:shadow-lg"
         style={{
-          width: image.width * scale,
-          height: image.height * scale,
+          width: baseWidth * scale,
+          height: baseHeight * scale,
           cursor: isDragging ? 'grabbing' : 'grab',
           border: '4px solid transparent',
-          position: 'absolute',
           transform: 'none',
           transition: isDragging ? 'none' : 'width 0.3s ease-in-out, height 0.3s ease-in-out',
-          zIndex: image.isExpanded ? 10 : 'auto'
+          zIndex: image.isExpanded ? 10 : hoveredImage === image.id ? 5 : 1
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.border = '4px solid black';
