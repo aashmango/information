@@ -26,7 +26,7 @@ export function DraggableImage({
   toggleExpand
 }: DraggableImageProps) {
   const nodeRef = useRef(null);
-  const scale = image.isExpanded ? 1.5 : 1;
+  const scale = image.isExpanded ? 3 : 1;
 
   return (
     <Draggable
