@@ -1,30 +1,18 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { ImageItem, TextBlock } from '../types';
-import { IMAGES, TEXT_BLOCKS } from '../data/content';
-import { DraggableImage } from '../components/DraggableImage';
+import { ImageItem, TextBlock } from '@/types';
+import { contentService } from '@/services/content';
+import { DraggableImage } from '@/components/DraggableImage';
 import DraggableText from '@/components/DraggableText';
 import DisplayFilters from '@/components/DisplayFilters';
 
 export default function Home() {
-  const [images, setImages] = useState<ImageItem[]>(() =>
-    IMAGES.map(img => ({
-      ...img,
-      position: img.defaultPosition,
-    }))
-  );
+  const [images, setImages] = useState<ImageItem[]>([]);
+  const [textBlocks, setTextBlocks] = useState<TextBlock[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<string | null>(null);
-
-  const [textBlocks, setTextBlocks] = useState<TextBlock[]>(() => 
-    TEXT_BLOCKS.map(text => ({
-      id: text.id,
-      content: text.content,
-      position: text.defaultPosition,
-      width: text.width,
-    }))
-  );
 
   const [showImages, setShowImages] = useState(true);
   const [showText, setShowText] = useState(true);
@@ -38,6 +26,37 @@ export default function Home() {
 
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
+  useEffect(() => {
+    async function loadContent() {
+      try {
+        setIsLoading(true);
+        const [imagesData, textData] = await Promise.all([
+          contentService.fetchImages(),
+          contentService.fetchTextBlocks()
+        ]);
+        console.log('Loaded images:', imagesData);
+        console.log('Loaded text:', textData);
+        
+        const initializedImages = imagesData.map(img => ({
+          ...img,
+          position: img.position || img.defaultPosition
+        }));
+        const initializedText = textData.map(text => ({
+          ...text,
+          position: text.position || text.default_position
+        }));
+        setImages(initializedImages);
+        setTextBlocks(initializedText);
+      } catch (error) {
+        console.error('Error loading content:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadContent();
   }, []);
 
   const toggleExpand = (imageId: string) => {

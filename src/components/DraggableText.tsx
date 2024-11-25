@@ -30,12 +30,10 @@ export default function DraggableText({
     >
       <div 
         ref={nodeRef}
-        className="fixed rounded-lg transition-all duration-200"
+        className="absolute rounded-lg transition-all duration-200"
         style={{
           width: text.width,
           cursor: isDragging ? 'grabbing' : 'grab',
-          position: 'absolute',
-          transform: 'none',
           zIndex: 5,
           padding: '24px',
         }}
