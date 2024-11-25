@@ -15,6 +15,7 @@ export default function Home() {
   );
   const [isDragging, setIsDragging] = useState(false);
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
   const [textBlocks, setTextBlocks] = useState<TextBlock[]>(() => 
     TEXT_BLOCKS.map(text => ({
@@ -40,6 +41,12 @@ export default function Home() {
   }, []);
 
   const toggleExpand = (imageId: string) => {
+    if (expandedImage === imageId) {
+      setExpandedImage(null);
+    } else {
+      setExpandedImage(imageId);
+    }
+    
     setImages(images.map(img => 
       img.id === imageId 
         ? { ...img, isExpanded: !img.isExpanded }
