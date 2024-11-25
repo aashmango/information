@@ -1,54 +1,36 @@
-'use client';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Draggable from 'react-draggable';
-import { TextBlock } from '../types';
+import { TextBlock, DraggableProps } from '@/types';
 
-interface DraggableTextProps {
+interface Props extends DraggableProps {
   text: TextBlock;
-  isDragging: boolean;
-  onDragStart: () => void;
-  onDragStop: () => void;
-  onDrag: (id: string, x: number, y: number) => void;
 }
 
-export default function DraggableText({
-  text,
-  isDragging,
-  onDragStart,
-  onDragStop,
-  onDrag,
-}: DraggableTextProps) {
+export default function DraggableText({ text, position, onPositionChange, id }: Props) {
   const nodeRef = useRef(null);
+  const [localPosition, setLocalPosition] = useState(position);
 
   return (
     <Draggable
       nodeRef={nodeRef}
-      position={text.current_position}
-      onStart={onDragStart}
-      onStop={onDragStop}
-      onDrag={(e, data) => onDrag(text.id, data.x, data.y)}
+      position={localPosition}
+      onStop={(_, data) => {
+        const newPosition = { x: data.x, y: data.y };
+        setLocalPosition(newPosition);
+        onPositionChange(newPosition);
+      }}
+      handle=".handle"
     >
       <div 
-        ref={nodeRef}
-        className="absolute rounded-lg transition-all duration-200"
-        style={{
-          width: text.width,
-          cursor: isDragging ? 'grabbing' : 'grab',
-          zIndex: 5,
-          padding: '24px',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'white';
-          e.currentTarget.style.boxShadow = '0 0 30px 10px rgba(0, 0, 0, 0.1)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
-          e.currentTarget.style.boxShadow = 'none';
-        }}
+        ref={nodeRef} 
+        style={{ position: 'absolute' }}
+        className="cursor-move handle"
       >
-        <p className="select-none text-black font-bold leading-relaxed m-0">
-          {text.content}
-        </p>
+        <div className="p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+          <p className="text-black leading-relaxed">
+            {text.content}
+          </p>
+        </div>
       </div>
     </Draggable>
   );

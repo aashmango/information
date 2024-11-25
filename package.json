@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.46.1",
+    "@types/lodash": "^4.17.13",
     "@types/react-resizable": "^3.0.8",
+    "lodash": "^4.17.21",
     "next": "14.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

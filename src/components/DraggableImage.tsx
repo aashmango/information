@@ -1,87 +1,43 @@
-'use client';
-import { useRef } from 'react';
-import Image from 'next/image';
+import { useRef, useState } from 'react';
 import Draggable from 'react-draggable';
-import { ImageItem } from '../types';
+import Image from 'next/image';
+import { ImageItem, DraggableProps } from '@/types';
 
-interface DraggableImageProps {
+interface Props extends DraggableProps {
   image: ImageItem;
-  isDragging: boolean;
-  hoveredImage: string | null;
-  onDragStart: () => void;
-  onDragStop: () => void;
-  onDrag: (id: string, x: number, y: number) => void;
-  onHover: (id: string | null) => void;
-  toggleExpand: (id: string) => void;
 }
 
-export function DraggableImage({
-  image,
-  isDragging,
-  hoveredImage,
-  onDragStart,
-  onDragStop,
-  onDrag,
-  onHover,
-  toggleExpand
-}: DraggableImageProps) {
+export default function DraggableImage({ image, position, onPositionChange, id }: Props) {
   const nodeRef = useRef(null);
-  const scale = image.isExpanded ? 3 : 1;
-  const baseWidth = 300;
-  const baseHeight = 200;
+  const [localPosition, setLocalPosition] = useState(position);
 
   return (
     <Draggable
       nodeRef={nodeRef}
-      position={image.current_position}
-      onStart={onDragStart}
-      onStop={onDragStop}
-      onDrag={(e, data) => onDrag(image.id, data.x, data.y)}
+      defaultPosition={localPosition}
+      onStop={(e, data) => {
+        const newPosition = { x: data.x, y: data.y };
+        setLocalPosition(newPosition);
+        onPositionChange(newPosition);
+      }}
     >
       <div 
-        ref={nodeRef}
-        className="absolute hover:shadow-lg"
-        style={{
-          width: baseWidth * scale,
-          height: baseHeight * scale,
-          cursor: isDragging ? 'grabbing' : 'grab',
-          border: '4px solid transparent',
-          transform: 'none',
-          transition: isDragging ? 'none' : 'width 0.3s ease-in-out, height 0.3s ease-in-out',
-          zIndex: image.isExpanded ? 10 : hoveredImage === image.id ? 5 : 1
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.border = '4px solid black';
-          onHover(image.id);
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.border = '4px solid transparent';
-          onHover(null);
+        ref={nodeRef} 
+        style={{ 
+          position: 'absolute',
+          cursor: 'move',
+          zIndex: 1000
         }}
       >
         <Image
           src={image.src}
-          alt=""
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          style={{ 
-            objectFit: 'cover',
-            userSelect: 'none',
-            zIndex: -1,
-          }}
+          alt={image.alt}
+          width={image.width}
+          height={image.height}
+          className="rounded-lg"
           draggable={false}
+          priority
         />
-        {hoveredImage === image.id && (
-          <button
-            className="absolute bottom-2 left-2 bg-black text-white px-2 py-1 text-sm rounded z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleExpand(image.id);
-            }}
-          >
-            {image.isExpanded ? 'shrink' : 'expand'}
-          </button>
-        )}
       </div>
     </Draggable>
   );

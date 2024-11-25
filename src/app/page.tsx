@@ -1,131 +1,123 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { ImageItem, TextBlock } from '@/types';
+import { ImageItem, TextBlock, Position, SavePositionsPayload } from '@/types';
 import { contentService } from '@/services/content';
-import { DraggableImage } from '@/components/DraggableImage';
+import DraggableImage from '@/components/DraggableImage';
 import DraggableText from '@/components/DraggableText';
 import DisplayFilters from '@/components/DisplayFilters';
 
 export default function Home() {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [textBlocks, setTextBlocks] = useState<TextBlock[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDragging, setIsDragging] = useState(false);
-  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
-  const [expandedImage, setExpandedImage] = useState<string | null>(null);
-
   const [showImages, setShowImages] = useState(true);
   const [showText, setShowText] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setExpandedImage(null);
-      }
+    const loadContent = async () => {
+      const [fetchedImages, fetchedTextBlocks] = await Promise.all([
+        contentService.fetchImages(),
+        contentService.fetchTextBlocks()
+      ]);
+      
+      const imagesWithPositions = fetchedImages.map(img => ({
+        ...img,
+        current_position: img.current_position || { x: 0, y: 0 }
+      }));
+      
+      const textBlocksWithPositions = fetchedTextBlocks.map(block => ({
+        ...block,
+        current_position: block.current_position || { x: 0, y: 0 }
+      }));
+      
+      setImages(imagesWithPositions);
+      setTextBlocks(textBlocksWithPositions);
     };
-
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, []);
-
-  useEffect(() => {
-    async function loadContent() {
-      try {
-        setIsLoading(true);
-        const [imagesData, textData] = await Promise.all([
-          contentService.fetchImages(),
-          contentService.fetchTextBlocks()
-        ]);
-        console.log('Loaded images:', imagesData);
-        console.log('Loaded text:', textData);
-        
-        const initializedImages = imagesData.map(img => ({
-          ...img,
-          position: img.position || img.defaultPosition
-        }));
-        const initializedText = textData.map(text => ({
-          ...text,
-          position: text.position || text.default_position
-        }));
-        setImages(initializedImages);
-        setTextBlocks(initializedText);
-      } catch (error) {
-        console.error('Error loading content:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
 
     loadContent();
   }, []);
 
-  const toggleExpand = (imageId: string) => {
-    if (expandedImage === imageId) {
-      setExpandedImage(null);
-    } else {
-      setExpandedImage(imageId);
-    }
-    
-    setImages(images.map(img => 
-      img.id === imageId 
-        ? { ...img, isExpanded: !img.isExpanded }
+  const handleImagePositionChange = (id: string, newPosition: Position) => {
+    setImages(prevImages => prevImages.map(img =>
+      img.id === id
+        ? { ...img, current_position: newPosition }
         : img
     ));
+    setHasUnsavedChanges(true);
   };
 
-  const onImageDrag = (id: string, x: number, y: number) => {
-    const updatedImages = images.map((img) =>
-      img.id === id
-        ? { ...img, current_position: { x, y } }
-        : img
-    );
-    setImages(updatedImages);
-  };
-
-  const onTextDrag = (id: string, x: number, y: number) => {
-    const updatedTextBlocks = textBlocks.map((block) =>
+  const handleTextPositionChange = (id: string, newPosition: Position) => {
+    setTextBlocks(prevBlocks => prevBlocks.map(block =>
       block.id === id
-        ? { ...block, current_position: { x, y } }
+        ? { ...block, current_position: newPosition }
         : block
-    );
-    setTextBlocks(updatedTextBlocks);
+    ));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      await contentService.savePositions({
+        images: images.map(img => ({
+          id: img.id,
+          position: {
+            x: img.current_position.x,
+            y: img.current_position.y
+          }
+        })),
+        textBlocks: textBlocks.map(block => ({
+          id: block.id,
+          position: {
+            x: block.current_position.x,
+            y: block.current_position.y
+          }
+        }))
+      });
+      setHasUnsavedChanges(false);
+    } catch (error) {
+      console.error('Failed to save positions:', error);
+    }
   };
 
   return (
-    <main className="min-h-screen p-8 bg-white relative">
+    <main className="min-h-screen p-8 bg-white">
       <DisplayFilters
         showImages={showImages}
         showText={showText}
         onToggleImages={setShowImages}
         onToggleText={setShowText}
       />
-
-      <div className="relative w-full h-screen overflow-hidden">
-        {showImages && images.map((image) => (
+      
+      <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+        {images.map((image) => (
           <DraggableImage
             key={image.id}
+            id={image.id}
             image={image}
-            isDragging={isDragging}
-            hoveredImage={hoveredImage}
-            onDragStart={() => setIsDragging(true)}
-            onDragStop={() => setIsDragging(false)}
-            onDrag={onImageDrag}
-            onHover={setHoveredImage}
-            toggleExpand={toggleExpand}
+            position={image.current_position}
+            onPositionChange={(newPosition) => handleImagePositionChange(image.id, newPosition)}
           />
         ))}
-
-        {showText && textBlocks.map((text) => (
+        
+        {showText && textBlocks.map(text => (
           <DraggableText
             key={text.id}
+            id={text.id}
             text={text}
-            isDragging={isDragging}
-            onDragStart={() => setIsDragging(true)}
-            onDragStop={() => setIsDragging(false)}
-            onDrag={onTextDrag}
+            position={text.current_position}
+            onPositionChange={(pos) => handleTextPositionChange(text.id, pos)}
           />
         ))}
       </div>
+
+      {hasUnsavedChanges && (
+        <button 
+          onClick={handleSaveChanges}
+          className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-800"
+        >
+          Save Changes
+        </button>
+      )}
     </main>
   );
 }
