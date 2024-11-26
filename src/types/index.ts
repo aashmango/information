@@ -47,6 +47,7 @@ export interface DraggableProps {
   position: Position;
   onPositionChange: (newPosition: Position) => void;
   id: string;
+  className?: string;
 }
 
 export interface SavePositionsPayload {

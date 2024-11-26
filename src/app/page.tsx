@@ -12,18 +12,15 @@ export default function Home() {
   const [showImages, setShowImages] = useState(true);
   const [showText, setShowText] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
 
   useEffect(() => {
     const loadContent = async () => {
-      console.log('Starting to load content...');
       try {
         const [fetchedImages, fetchedTextBlocks] = await Promise.all([
           contentService.fetchImages(),
           contentService.fetchTextBlocks()
         ]);
-        
-        console.log('Fetched images:', fetchedImages);
-        console.log('Fetched text blocks:', fetchedTextBlocks);
         
         const imagesWithPositions = fetchedImages.map(img => ({
           ...img,
@@ -35,9 +32,6 @@ export default function Home() {
           current_position: block.current_position || { x: 0, y: 0 }
         }));
         
-        console.log('Processed images:', imagesWithPositions);
-        console.log('Processed text blocks:', textBlocksWithPositions);
-        
         setImages(imagesWithPositions);
         setTextBlocks(textBlocksWithPositions);
       } catch (error) {
@@ -48,6 +42,10 @@ export default function Home() {
     loadContent();
   }, []);
 
+  useEffect(() => {
+    updateContentHeight();
+  }, [images, textBlocks]);
+
   const handleImagePositionChange = (id: string, newPosition: Position) => {
     setImages(prevImages => prevImages.map(img =>
       img.id === id
@@ -55,6 +53,7 @@ export default function Home() {
         : img
     ));
     setHasUnsavedChanges(true);
+    requestAnimationFrame(updateContentHeight);
   };
 
   const handleTextPositionChange = (id: string, newPosition: Position) => {
@@ -64,6 +63,7 @@ export default function Home() {
         : block
     ));
     setHasUnsavedChanges(true);
+    requestAnimationFrame(updateContentHeight);
   };
 
   const handleSaveChanges = async () => {
@@ -90,6 +90,20 @@ export default function Home() {
     }
   };
 
+  const updateContentHeight = () => {
+    const elements = document.querySelectorAll('.draggable-item');
+    let maxY = 0;
+    
+    elements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const bottomY = rect.bottom;
+      maxY = Math.max(maxY, bottomY);
+    });
+
+    // Add padding below the lowest element
+    setContentHeight(maxY + 100);
+  };
+
   return (
     <main className="min-h-screen p-8 bg-white">
       <DisplayFilters
@@ -99,7 +113,13 @@ export default function Home() {
         onToggleText={setShowText}
       />
       
-      <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+      <div 
+        style={{ 
+          position: 'relative',
+          width: '100%',
+          height: `${contentHeight}px`,
+        }}
+      >
         {images.map((image) => (
           <DraggableImage
             key={image.id}
@@ -107,6 +127,7 @@ export default function Home() {
             image={image}
             position={image.current_position}
             onPositionChange={(newPosition) => handleImagePositionChange(image.id, newPosition)}
+            className="draggable-item"
           />
         ))}
         
@@ -117,6 +138,7 @@ export default function Home() {
             text={text}
             position={text.current_position}
             onPositionChange={(pos) => handleTextPositionChange(text.id, pos)}
+            className="draggable-item"
           />
         ))}
       </div>

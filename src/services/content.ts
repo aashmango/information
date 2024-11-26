@@ -51,22 +51,14 @@ export const contentService = {
       };
     });
 
-    console.log('Loaded images with positions:', mappedData.map(img => ({
-      id: img.id,
-      position: img.current_position
-    })));
-
     return mappedData;
   },
 
   async fetchTextBlocks(): Promise<TextBlock[]> {
-    console.log('Fetching text blocks from Supabase...');
     const { data, error } = await supabase
       .from('text_blocks')
       .select('*')
       .order('created_at', { ascending: true })
-
-    console.log('Supabase text blocks response:', { data, error });
 
     if (error) {
       this.handleError(error, 'fetching text blocks')
@@ -103,38 +95,24 @@ export const contentService = {
 
   async savePositions(changes: SavePositionsPayload): Promise<void> {
     try {
-      console.log('Save operation starting with payload:', JSON.stringify(changes, null, 2));
-
       for (const { id, position } of changes.images) {
-        console.log(`Saving image ${id}...`);
-        const { data, error, status } = await supabase  // Added status to response
+        const { data, error, status } = await supabase
           .from('images')
           .update({ current_position: position })
           .eq('id', id)
-          .select('*');  // Get full record back
-
-        console.log(`Update response for image ${id}:`, {
-          success: !error,
-          status,
-          error,
-          updatedData: data
-        });
+          .select('*');
 
         if (error) {
           throw new Error(`Failed to update image ${id}: ${error.message}`);
         }
       }
 
-      // Verify the updates immediately
       const { data: verificationData } = await supabase
         .from('images')
         .select('id, current_position')
         .in('id', changes.images.map(img => img.id));
 
-      console.log('Verification of updates:', verificationData);
-
     } catch (error) {
-      console.error('Save operation failed:', error);
       throw error;
     }
   }

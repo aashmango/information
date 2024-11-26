@@ -5,9 +5,10 @@ import { ImageItem, DraggableProps } from '@/types';
 
 interface Props extends DraggableProps {
   image: ImageItem;
+  className?: string;
 }
 
-export default function DraggableImage({ image, position, onPositionChange, id }: Props) {
+export default function DraggableImage({ image, position, onPositionChange, id, className }: Props) {
   const nodeRef = useRef(null);
   const [localPosition, setLocalPosition] = useState(position);
 
@@ -15,7 +16,7 @@ export default function DraggableImage({ image, position, onPositionChange, id }
     <Draggable
       nodeRef={nodeRef}
       position={localPosition}
-      onStop={(e, data) => {
+      onDrag={(_, data) => {
         const newPosition = { x: data.x, y: data.y };
         setLocalPosition(newPosition);
         onPositionChange(newPosition);
@@ -23,6 +24,7 @@ export default function DraggableImage({ image, position, onPositionChange, id }
     >
       <div 
         ref={nodeRef} 
+        className={className}
         style={{ 
           position: 'absolute',
           cursor: 'move',
