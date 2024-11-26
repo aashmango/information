@@ -67,8 +67,9 @@ async function processAndUploadImage(file: any, supabase: any) {
       
       thumbnailPath = `thumbnails/${file.name.replace(/\.[^/.]+$/, "")}.webp`
     } else if (['gif', 'mov', 'mp4'].includes(fileExt)) {
-      // For GIFs and videos, just use the original file
-      console.log(`Skipping processing for ${file.name} - using original file for both URLs`)
+      // For GIFs and videos, get dimensions from original file
+      const dimensions = await sharp(fileBuffer).metadata()
+      
       const { data: { publicUrl } } = supabase
         .storage
         .from('assets')
@@ -76,7 +77,9 @@ async function processAndUploadImage(file: any, supabase: any) {
       
       return {
         originalUrl: publicUrl,
-        thumbnailUrl: publicUrl // Use same URL for both
+        thumbnailUrl: publicUrl, // Use same URL for both
+        thumbnail_width: dimensions.width,
+        thumbnail_height: dimensions.height
       }
     } else {
       console.log(`Unsupported file type for ${file.name}`)
@@ -195,7 +198,7 @@ async function updateImagesTable() {
           height: dimensions.height,
           default_position: position,
           current_position: position,
-          description: '',
+          description: `Description for ${file.name.replace(/\.[^/.]+$/, "")}`,
           created_at: new Date().toISOString(),
           thumbnail_width: urls.thumbnail_width,
           thumbnail_height: urls.thumbnail_height
