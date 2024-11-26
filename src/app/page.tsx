@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ImageItem, TextBlock, Position } from '@/types';
 import { contentService } from '@/services/content';
 import DraggableImage from '@/components/DraggableImage';
@@ -15,6 +15,7 @@ export default function Home() {
   const [showImages, setShowImages] = useState(true);
   const [showText, setShowText] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const loadContent = async () => {
@@ -39,6 +40,18 @@ export default function Home() {
     };
 
     loadContent();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollPosition({
+        x: window.scrollX,
+        y: window.scrollY
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handlePositionChange = useCallback((
@@ -127,6 +140,9 @@ export default function Home() {
         textBlocks={textBlocks}
         showImages={showImages}
         showText={showText}
+        scrollPosition={scrollPosition}
+        containerWidth={100}
+        containerHeight={200}
       />
       
       {showImages && images.map(image => (

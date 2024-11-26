@@ -6,9 +6,12 @@ interface MinimapProps {
   textBlocks: TextBlock[];
   showImages: boolean;
   showText: boolean;
+  scrollPosition: { x: number; y: number };
+  containerWidth: number;
+  containerHeight: number;
 }
 
-export default function Minimap({ images, textBlocks, showImages, showText }: MinimapProps) {
+export default function Minimap({ images, textBlocks, showImages, showText, scrollPosition, containerWidth, containerHeight }: MinimapProps) {
   const [viewportWidth, setViewportWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 5000
   );
@@ -45,71 +48,75 @@ export default function Minimap({ images, textBlocks, showImages, showText }: Mi
 
   const bounds = getBounds();
   // Use viewport width and fixed height for the canvas size
-  const contentWidth = Math.max(bounds.maxX - bounds.minX + 32, viewportWidth);
-  const contentHeight = Math.max(bounds.maxY - bounds.minY + 32, 5000);
+  const contentWidth = Math.max(bounds.maxX - bounds.minX, viewportWidth);
+  const contentHeight = Math.max(bounds.maxY - bounds.minY, 5000);
 
-  // Calculate scale to fit in the minimap container
-  const containerWidth = 200;
-  const containerHeight = 300;
-  const scale = Math.min(
-    containerWidth / contentWidth,
-    containerHeight / contentHeight
-  ) * 0.9;
+  // Calculate scale for width and height separately
+  const scaleX = containerWidth / contentWidth;
+  const scaleY = containerHeight / contentHeight;
+
+  // Use scaleX for all calculations
+  const scale = scaleX;
+
+  // Log the content and container widths
+  console.log('Content Width:', contentWidth);
+  console.log('Container Width:', containerWidth);
 
   const minimapStyle: CSSProperties = {
     position: 'fixed',
     right: '20px',
     top: '20px',
-    width: '200px',
-    height: '300px',
+    width: `${containerWidth}px`,
+    height: `${containerHeight}px`,
     border: '1px solid #ccc',
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     overflow: 'hidden',
     zIndex: 1000,
   };
 
-  const contentStyle: CSSProperties = {
-    position: 'absolute',
-    width: `${contentWidth * scale}px`,
-    height: `${contentHeight * scale}px`,
-    backgroundImage: `radial-gradient(#CCCCCC 1px, transparent 1px)`,
-    backgroundSize: `${16 * scale}px ${16 * scale}px`,
-    transform: `translate(${-bounds.minX * scale}px, ${-bounds.minY * scale}px)`,
-    transformOrigin: '0 0',
-  };
-
   return (
     <div style={minimapStyle}>
-      <div style={contentStyle}>
-        {showImages && images.map(image => (
-          <div
-            key={image.id}
-            style={{
-              position: 'absolute',
-              left: `${image.current_position.x * scale}px`,
-              top: `${image.current_position.y * scale}px`,
-              width: `${(image.isExpanded ? 300 : 150) * scale}px`,
-              height: `${(image.isExpanded ? 300 : 150) * scale}px`,
-              backgroundColor: '#007AFF',
-              opacity: 0.5,
-            }}
-          />
-        ))}
-        {showText && textBlocks.map(text => (
-          <div
-            key={text.id}
-            style={{
-              position: 'absolute',
-              left: `${text.current_position.x * scale}px`,
-              top: `${text.current_position.y * scale}px`,
-              width: `${100 * scale}px`,
-              height: `${50 * scale}px`,
-              backgroundColor: '#FF9500',
-              opacity: 0.5,
-            }}
-          />
-        ))}
-      </div>
+      {showImages && images.map(image => (
+        <div
+          key={image.id}
+          style={{
+            position: 'absolute',
+            left: `${image.current_position.x * scaleX}px`,
+            top: `${image.current_position.y * scaleX}px`,
+            width: `${(image.isExpanded ? 300 : 150) * scaleX}px`,
+            height: `${(image.isExpanded ? 300 : 150) * scaleX}px`,
+            backgroundColor: '#007AFF',
+            opacity: 0.5,
+          }}
+        />
+      ))}
+      {showText && textBlocks.map(text => (
+        <div
+          key={text.id}
+          style={{
+            position: 'absolute',
+            left: `${text.current_position.x * scaleX}px`,
+            top: `${text.current_position.y * scaleX}px`,
+            width: `${100 * scaleX}px`,
+            height: `${50 * scaleX}px`,
+            backgroundColor: '#FF9500',
+            opacity: 0.5,
+          }}
+        />
+      ))}
+
+      {/* Viewport indicator */}
+      <div
+        style={{
+          position: 'absolute',
+          left: `${scrollPosition.x * scaleX}px`,
+          top: `${scrollPosition.y * scaleX}px`,
+          width: `${containerWidth}px`,
+          height: `${window.innerHeight * scaleX}px`,
+          backgroundColor: 'rgba(0, 0, 0, 0.1)',
+          pointerEvents: 'none',
+        }}
+      />
     </div>
   );
 }
