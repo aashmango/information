@@ -122,8 +122,13 @@ export default function Home() {
 
   const handleToggleSize = useCallback((id: string) => {
     setImages(prev => prev.map(img =>
-      img.id === id ? { ...img, isExpanded: !img.isExpanded } : img
+      img.id === id ? { 
+        ...img, 
+        isExpanded: !img.isExpanded,
+        src: !img.isExpanded ? (img.original_url || img.src) : (img.thumbnail_url || img.src)
+      } : img
     ));
+    setHasUnsavedChanges(true);
   }, []);
 
   return (

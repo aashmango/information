@@ -33,6 +33,12 @@ export default function DraggableImage({
   const currentDimensions = image.isExpanded ? dimensions.expanded : dimensions.thumbnail;
   const currentSrc = image.isExpanded ? (image.original_url || image.src) : (image.thumbnail_url || image.src);
 
+  // At the top of the component, update the transition style to be more specific
+  const transitionStyle = {
+    transition: 'width 0.2s ease-out, height 0.2s ease-out',
+    willChange: 'width, height' // Optimize for animations
+  };
+
   // Handle clicks outside the component to exit edit mode
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -67,6 +73,8 @@ export default function DraggableImage({
           cursor: isDragging ? 'grabbing' : 'grab',
           zIndex: isDragging ? 1000 : 'auto',
           backgroundColor: 'white',
+          transform: `translate(${position.x}px, ${position.y}px)`, // Explicit transform
+          transition: 'none', // Prevent transition during drag
         }}
         className={className}
         onMouseEnter={() => setIsHovered(true)}
@@ -90,12 +98,77 @@ export default function DraggableImage({
             alt={image.alt}
             width={currentDimensions.width}
             height={currentDimensions.height}
-            className="rounded-lg select-none"
-            style={{ maxWidth: '100%', height: 'auto' }}
+            className="select-none"
+            style={{ 
+              maxWidth: '100%', 
+              height: 'auto',
+              transition: 'all 0.2s ease-out',
+              willChange: 'width, height'
+            }}
             draggable={false}
             priority={image.isExpanded}
           />
-          <div className="w-full flex justify-between items-center">
+          <div className="w-full flex flex-col gap-1">
+            <div className="flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (image.isExpanded) onToggleSize?.();
+                }}
+                className="!text-xs transition-colors"
+                style={{
+                  fontSize: '0.75rem',
+                  border: 'none',
+                  borderBottom: !image.isExpanded ? '1px solid currentColor' : 'none',
+                  padding: 0,
+                  margin: 0,
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: !image.isExpanded ? '#000' : '#A0A0A0',
+                }}
+                onMouseEnter={(e) => {
+                  if (image.isExpanded) {
+                    e.currentTarget.style.borderBottom = '1px solid #E5E5E5';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (image.isExpanded) {
+                    e.currentTarget.style.borderBottom = 'none';
+                  }
+                }}
+              >
+                Small
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!image.isExpanded) onToggleSize?.();
+                }}
+                className="!text-xs transition-colors"
+                style={{
+                  fontSize: '0.75rem',
+                  border: 'none',
+                  borderBottom: image.isExpanded ? '1px solid currentColor' : 'none',
+                  padding: 0,
+                  margin: 0,
+                  background: 'none',
+                  cursor: 'pointer',
+                  color: image.isExpanded ? '#000' : '#A0A0A0',
+                }}
+                onMouseEnter={(e) => {
+                  if (!image.isExpanded) {
+                    e.currentTarget.style.borderBottom = '1px solid #E5E5E5';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!image.isExpanded) {
+                    e.currentTarget.style.borderBottom = 'none';
+                  }
+                }}
+              >
+                Big
+              </button>
+            </div>
             {!isEditing ? (
               <div 
                 className="!text-xs text-gray-700"
@@ -105,10 +178,10 @@ export default function DraggableImage({
                   maxWidth: `${currentDimensions.width}px`, 
                   lineHeight: '1.5', 
                   textAlign: 'left',
-                  whiteSpace: 'pre-wrap', // Preserve line breaks
-                  overflowWrap: 'break-word', // Break long words
-                  minHeight: '1.5em', // Ensure consistent height
-                  color: '#A0A0A0' // Muted gray color
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'break-word',
+                  minHeight: '1.5em',
+                  color: '#A0A0A0'
                 }}
                 onClick={() => setIsEditing(true)}
               >
@@ -140,26 +213,6 @@ export default function DraggableImage({
                   target.style.height = `${target.scrollHeight}px`; // Set to scroll height
                 }}
               />
-            )}
-            {isHovered && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleSize?.();
-                }}
-                className="!text-xs text-gray-700 hover:text-black transition-colors"
-                style={{
-                  fontSize: '0.75rem',
-                  border: 'none',
-                  borderBottom: '1px solid currentColor',
-                  padding: 0,
-                  margin: 0,
-                  background: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                {image.isExpanded ? 'Small' : 'Big'}
-              </button>
             )}
           </div>
         </div>
