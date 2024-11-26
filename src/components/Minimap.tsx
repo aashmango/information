@@ -12,17 +12,19 @@ interface MinimapProps {
 }
 
 export default function Minimap({ images, textBlocks, showImages, showText, scrollPosition, containerWidth, containerHeight }: MinimapProps) {
-  const [viewportWidth, setViewportWidth] = useState(
-    typeof window !== 'undefined' ? window.innerWidth : 5000
-  );
+  const [viewportWidth, setViewportWidth] = useState(5000);
 
   useEffect(() => {
-    const handleResize = () => {
+    if (typeof window !== 'undefined') {
       setViewportWidth(window.innerWidth);
-    };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+      const handleResize = () => {
+        setViewportWidth(window.innerWidth);
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
   }, []);
 
   const getBounds = () => {
@@ -54,13 +56,6 @@ export default function Minimap({ images, textBlocks, showImages, showText, scro
   // Calculate scale for width and height separately
   const scaleX = containerWidth / contentWidth;
   const scaleY = containerHeight / contentHeight;
-
-  // Use scaleX for all calculations
-  const scale = scaleX;
-
-  // Log the content and container widths
-  console.log('Content Width:', contentWidth);
-  console.log('Container Width:', containerWidth);
 
   const minimapStyle: CSSProperties = {
     position: 'fixed',
@@ -112,7 +107,7 @@ export default function Minimap({ images, textBlocks, showImages, showText, scro
           left: `${scrollPosition.x * scaleX}px`,
           top: `${scrollPosition.y * scaleX}px`,
           width: `${containerWidth}px`,
-          height: `${window.innerHeight * scaleX}px`,
+          height: `${typeof window !== 'undefined' ? window.innerHeight * scaleX : 0}px`,
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           pointerEvents: 'none',
         }}
