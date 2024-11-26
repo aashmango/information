@@ -18,7 +18,6 @@ export default function DraggableImage({
   onToggleSize 
 }: Props) {
   const nodeRef = useRef(null);
-  const [localPosition, setLocalPosition] = useState(position);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -27,13 +26,14 @@ export default function DraggableImage({
   return (
     <Draggable
       nodeRef={nodeRef}
-      position={localPosition}
+      position={position}
+      grid={[16, 16]}
+      offsetParent={document.body}
+      scale={1}
       onStart={() => setIsDragging(true)}
       onStop={() => setIsDragging(false)}
       onDrag={(_, data) => {
-        const newPosition = { x: data.x, y: data.y };
-        setLocalPosition(newPosition);
-        onPositionChange(newPosition);
+        onPositionChange({ x: data.x, y: data.y });
       }}
     >
       <div 
@@ -42,6 +42,7 @@ export default function DraggableImage({
           position: 'absolute',
           cursor: isDragging ? 'grabbing' : 'grab',
           zIndex: isDragging ? 1000 : 'auto',
+          backgroundColor: 'white',
         }}
         className={className}
         onMouseEnter={() => setIsHovered(true)}
@@ -52,13 +53,13 @@ export default function DraggableImage({
             transform: `scale(${scale})`,
             transition: 'transform 0.3s ease-in-out, box-shadow 0.2s ease-in-out',
             transformOrigin: 'bottom right',
-            outline: isHovered ? '1px solid #A0A0A0' : 'none',
             borderRadius: '2px',
             padding: '8px',
-            border: isDragging 
-              ? '1px solid #E5E5E5'
-              : '1px solid #F0F0F0',
-            backgroundColor: isHovered ? 'white' : 'transparent',
+            border: `1px solid ${isHovered ? '#A0A0A0' : isDragging ? '#E5E5E5' : '#F0F0F0'}`,
+            backgroundColor: 'white',
+            boxShadow: isHovered 
+              ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              : 'none',
           }}
           className="flex flex-col gap-2"
         >

@@ -7,22 +7,25 @@ interface Props extends DraggableProps {
   className?: string;
 }
 
+interface Props extends DraggableProps {
+  text: TextBlock;
+  className?: string;
+}
+
 export default function DraggableText({ text, position, onPositionChange, id, className }: Props) {
   const nodeRef = useRef(null);
-  const [localPosition, setLocalPosition] = useState(position);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <Draggable
       nodeRef={nodeRef}
-      position={localPosition}
+      position={position}
+      grid={[16, 16]}
       onStart={() => setIsDragging(true)}
       onStop={() => setIsDragging(false)}
       onDrag={(_, data) => {
-        const newPosition = { x: data.x, y: data.y };
-        setLocalPosition(newPosition);
-        onPositionChange(newPosition);
+        onPositionChange({ x: data.x, y: data.y });
       }}
     >
       <div 
@@ -30,27 +33,32 @@ export default function DraggableText({ text, position, onPositionChange, id, cl
         style={{ 
           position: 'absolute',
           cursor: isDragging ? 'grabbing' : 'grab',
+          zIndex: isDragging ? 1000 : 'auto',
         }}
         className={className}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <div
-          className="bg-gray-50 rounded-full select-none"
+          className="select-none"
           style={{
-            transition: 'all 0.1s ease-in-out',
-            border: isHovered ? '1px solid #E5E5E5' : 'none',
+            transition: 'transform 0.3s ease-in-out, box-shadow 0.2s ease-in-out',
             borderRadius: '2px',
-            padding: '4px',
-            backgroundColor: isHovered ? 'white' : 'transparent',
+            padding: '8px',
+            border: `1px solid ${isHovered ? '#A0A0A0' : isDragging ? '#E5E5E5' : '#F0F0F0'}`,
+            backgroundColor: 'white',
             zIndex: isDragging ? 1000 : 'auto',
+            boxShadow: isHovered 
+              ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              : 'none',
           }}
         >
           <p 
-            className="text-black leading-relaxed p-8 border-2 border-gray-200 rounded-full"
+            className="text-black leading-relaxed p-8"
             style={{ 
               margin: 0,
-              maxWidth: '300px' 
+              maxWidth: '300px',
+              borderRadius: '0px'
             }}
           >
             {text.content}

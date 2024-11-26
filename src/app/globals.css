@@ -6,6 +6,7 @@ body {
   color: #171717;
   background: #ffffff;
   font-family: var(--font-geist-sans);
+  margin: 0;
 }
 
 .cursor-grab {

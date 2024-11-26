@@ -1,10 +1,13 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { ImageItem, TextBlock, Position, SavePositionsPayload } from '@/types';
+import { ImageItem, TextBlock, Position } from '@/types';
 import { contentService } from '@/services/content';
 import DraggableImage from '@/components/DraggableImage';
 import DraggableText from '@/components/DraggableText';
 import DisplayFilters from '@/components/DisplayFilters';
+import Minimap from '@/components/Minimap';
+
+const FILTER_NAV_HEIGHT = 22;
 
 export default function Home() {
   const [images, setImages] = useState<ImageItem[]>([]);
@@ -12,28 +15,24 @@ export default function Home() {
   const [showImages, setShowImages] = useState(true);
   const [showText, setShowText] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [contentHeight, setContentHeight] = useState(0);
 
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const [fetchedImages, fetchedTextBlocks] = await Promise.all([
+        const [images, texts] = await Promise.all([
           contentService.fetchImages(),
           contentService.fetchTextBlocks()
         ]);
         
-        const imagesWithPositions = fetchedImages.map(img => ({
+        const defaultPosition = { x: 0, y: 0 };
+        setImages(images.map(img => ({
           ...img,
-          current_position: img.current_position || { x: 0, y: 0 }
-        }));
-        
-        const textBlocksWithPositions = fetchedTextBlocks.map(block => ({
-          ...block,
-          current_position: block.current_position || { x: 0, y: 0 }
-        }));
-        
-        setImages(imagesWithPositions);
-        setTextBlocks(textBlocksWithPositions);
+          current_position: img.current_position || defaultPosition
+        })));
+        setTextBlocks(texts.map(text => ({
+          ...text,
+          current_position: text.current_position || defaultPosition
+        })));
       } catch (error) {
         console.error('Error loading content:', error);
       }
@@ -42,42 +41,57 @@ export default function Home() {
     loadContent();
   }, []);
 
-  useEffect(() => {
-    updateContentHeight();
-  }, [images, textBlocks]);
+  const handlePositionChange = useCallback((
+    id: string,
+    newPosition: Position,
+    isImage: boolean
+  ) => {
+    const snappedPosition = {
+      x: Math.round(newPosition.x / 16) * 16,
+      y: Math.round(newPosition.y / 16) * 16
+    };
+
+    if (isImage) {
+      setImages(prev => prev.map(item =>
+        item.id === id
+          ? { ...item, current_position: snappedPosition }
+          : item
+      ));
+    } else {
+      setTextBlocks(prev => prev.map(item =>
+        item.id === id
+          ? { ...item, current_position: snappedPosition }
+          : item
+      ));
+    }
+    setHasUnsavedChanges(true);
+  }, []);
 
   const handleSaveChanges = useCallback(async () => {
     try {
       await contentService.savePositions({
-        images: images.map(img => ({
-          id: img.id,
-          position: {
-            x: img.current_position.x,
-            y: img.current_position.y
-          }
+        images: images.map(({ id, current_position: { x, y } }) => ({
+          id,
+          position: { x, y }
         })),
-        textBlocks: textBlocks.map(block => ({
-          id: block.id,
-          position: {
-            x: block.current_position.x,
-            y: block.current_position.y
-          }
+        textBlocks: textBlocks.map(({ id, current_position: { x, y } }) => ({
+          id,
+          position: { x, y }
         }))
       });
       setHasUnsavedChanges(false);
+      alert('Saved!');
     } catch (error) {
       console.error('Failed to save positions:', error);
+      alert('Failed to save!');
     }
   }, [images, textBlocks]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.ctrlKey && !event.metaKey && event.key === 's') {
-        event.preventDefault(); // Prevent browser's save dialog
-        console.log('Ctrl+S pressed, hasUnsavedChanges:', hasUnsavedChanges); // Debug log
-        if (hasUnsavedChanges) {
-          handleSaveChanges();
-        }
+      if (event.ctrlKey && event.key === 's') {
+        event.preventDefault();
+        if (hasUnsavedChanges) handleSaveChanges();
       }
     };
 
@@ -85,94 +99,80 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [hasUnsavedChanges, handleSaveChanges]);
 
-  const handleImagePositionChange = (id: string, newPosition: Position) => {
-    setImages(prevImages => prevImages.map(img =>
-      img.id === id
-        ? { ...img, current_position: newPosition }
-        : img
+  const handleToggleSize = useCallback((id: string) => {
+    setImages(prev => prev.map(img =>
+      img.id === id ? { ...img, isExpanded: !img.isExpanded } : img
     ));
-    setHasUnsavedChanges(true);
-    requestAnimationFrame(updateContentHeight);
-  };
-
-  const handleTextPositionChange = (id: string, newPosition: Position) => {
-    setTextBlocks(prevBlocks => prevBlocks.map(block =>
-      block.id === id
-        ? { ...block, current_position: newPosition }
-        : block
-    ));
-    setHasUnsavedChanges(true);
-    requestAnimationFrame(updateContentHeight);
-  };
-
-  const updateContentHeight = () => {
-    const elements = document.querySelectorAll('.draggable-item');
-    let maxY = 0;
-    
-    elements.forEach(el => {
-      const rect = el.getBoundingClientRect();
-      const bottomY = rect.bottom;
-      maxY = Math.max(maxY, bottomY);
-    });
-
-    // Add padding below the lowest element
-    setContentHeight(maxY + 100);
-  };
-
-  const handleToggleSize = (id: string) => {
-    setImages(prevImages => prevImages.map(img =>
-      img.id === id
-        ? { ...img, isExpanded: !img.isExpanded }
-        : img
-    ));
-  };
+  }, []);
 
   return (
-    <>
-      <div 
-        style={{ 
-          position: 'relative',
-          width: '100%',
-          minHeight: `${contentHeight}px`,
-          backgroundColor: 'white',
-          border: '1px solid black',
-        }}
-      >
-        <main className="p-8 relative flex flex-row justify-between">
-          <DisplayFilters
-            showImages={showImages}
-            showText={showText}
-            onToggleImages={setShowImages}
-            onToggleText={setShowText}
-          />
-          
-          <div className="relative">
-            {showImages && images.map((image) => (
-              <DraggableImage
-                key={image.id}
-                id={image.id}
-                image={image}
-                position={image.current_position}
-                onPositionChange={(newPosition) => handleImagePositionChange(image.id, newPosition)}
-                className="draggable-item"
-                onToggleSize={() => handleToggleSize(image.id)}
-              />
-            ))}
-            
-            {showText && textBlocks.map(text => (
-              <DraggableText
-                key={text.id}
-                id={text.id}
-                text={text}
-                position={text.current_position}
-                onPositionChange={(pos) => handleTextPositionChange(text.id, pos)}
-                className="draggable-item"
-              />
-            ))}
-          </div>
-        </main>
+    <main 
+      style={{
+        width: '100%',
+        height: '5000px',
+        position: 'relative',
+        backgroundColor: 'white',
+        backgroundImage: `
+          radial-gradient(#CCCCCC 1px, 
+          transparent 1px)
+        `,
+        backgroundSize: '16px 16px',
+        backgroundPosition: `8px ${FILTER_NAV_HEIGHT + 8}px`,
+        backgroundRepeat: 'repeat',
+        overflow: 'auto',
+      }}
+    >
+      <Minimap
+        images={images}
+        textBlocks={textBlocks}
+        showImages={showImages}
+        showText={showText}
+      />
+      
+      {showImages && images.map(image => (
+        <DraggableImage
+          key={image.id}
+          id={image.id}
+          position={image.current_position}
+          image={image}
+          onPositionChange={(pos) => handlePositionChange(image.id, pos, true)}
+          onToggleSize={() => handleToggleSize(image.id)}
+        />
+      ))}
+
+      {showText && textBlocks.map(text => (
+        <DraggableText
+          key={text.id}
+          id={text.id}
+          text={text}
+          position={text.current_position}
+          onPositionChange={(pos) => handlePositionChange(text.id, pos, false)}
+        />
+      ))}
+
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '50px',
+        backgroundColor: 'white',
+        borderTop: '1px solid #ccc',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 20px',
+        zIndex: 1000,
+      }}>
+        <span style={{ marginRight: '20px' }}>
+          Placeholder Text
+        </span>
+        <DisplayFilters
+          showImages={showImages}
+          showText={showText}
+          onToggleImages={setShowImages}
+          onToggleText={setShowText}
+        />
       </div>
-      <div className="w-full h-[900px] bg-black" />
-    </>
+    </main>
   );
 }
