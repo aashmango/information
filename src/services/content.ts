@@ -95,23 +95,29 @@ export const contentService = {
 
   async savePositions(changes: SavePositionsPayload): Promise<void> {
     try {
+      // Save image positions
       for (const { id, position } of changes.images) {
-        const { data, error, status } = await supabase
+        const { error } = await supabase
           .from('images')
           .update({ current_position: position })
-          .eq('id', id)
-          .select('*');
+          .eq('id', id);
 
         if (error) {
           throw new Error(`Failed to update image ${id}: ${error.message}`);
         }
       }
 
-      const { data: verificationData } = await supabase
-        .from('images')
-        .select('id, current_position')
-        .in('id', changes.images.map(img => img.id));
+      // Save text block positions
+      for (const { id, position } of changes.textBlocks) {
+        const { error } = await supabase
+          .from('text_blocks')
+          .update({ current_position: position })
+          .eq('id', id);
 
+        if (error) {
+          throw new Error(`Failed to update text block ${id}: ${error.message}`);
+        }
+      }
     } catch (error) {
       throw error;
     }

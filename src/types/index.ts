@@ -11,6 +11,7 @@ export interface ImageItem {
   height: number;
   current_position: Position;
   default_position: Position;
+  isExpanded?: boolean;
 }
 
 export interface TextBlock {

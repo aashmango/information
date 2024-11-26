@@ -7,3 +7,13 @@ body {
   background: #ffffff;
   font-family: var(--font-geist-sans);
 }
+
+.cursor-grab {
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+
+.cursor-grabbing {
+  cursor: -webkit-grabbing;
+  cursor: grabbing;
+}

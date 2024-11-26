@@ -104,53 +104,67 @@ export default function Home() {
     setContentHeight(maxY + 100);
   };
 
+  const handleToggleSize = (id: string) => {
+    setImages(prevImages => prevImages.map(img =>
+      img.id === id
+        ? { ...img, isExpanded: !img.isExpanded }
+        : img
+    ));
+  };
+
   return (
-    <main className="min-h-screen p-8 bg-white">
-      <DisplayFilters
-        showImages={showImages}
-        showText={showText}
-        onToggleImages={setShowImages}
-        onToggleText={setShowText}
-      />
-      
+    <>
       <div 
         style={{ 
           position: 'relative',
           width: '100%',
-          height: `${contentHeight}px`,
+          minHeight: `${contentHeight}px`,
         }}
       >
-        {images.map((image) => (
-          <DraggableImage
-            key={image.id}
-            id={image.id}
-            image={image}
-            position={image.current_position}
-            onPositionChange={(newPosition) => handleImagePositionChange(image.id, newPosition)}
-            className="draggable-item"
+        <main className="p-8 bg-white relative">
+          <DisplayFilters
+            showImages={showImages}
+            showText={showText}
+            onToggleImages={setShowImages}
+            onToggleText={setShowText}
           />
-        ))}
-        
-        {showText && textBlocks.map(text => (
-          <DraggableText
-            key={text.id}
-            id={text.id}
-            text={text}
-            position={text.current_position}
-            onPositionChange={(pos) => handleTextPositionChange(text.id, pos)}
-            className="draggable-item"
-          />
-        ))}
-      </div>
+          
+          <div className="relative">
+            {showImages && images.map((image) => (
+              <DraggableImage
+                key={image.id}
+                id={image.id}
+                image={image}
+                position={image.current_position}
+                onPositionChange={(newPosition) => handleImagePositionChange(image.id, newPosition)}
+                className="draggable-item"
+                onToggleSize={() => handleToggleSize(image.id)}
+              />
+            ))}
+            
+            {showText && textBlocks.map(text => (
+              <DraggableText
+                key={text.id}
+                id={text.id}
+                text={text}
+                position={text.current_position}
+                onPositionChange={(pos) => handleTextPositionChange(text.id, pos)}
+                className="draggable-item"
+              />
+            ))}
+          </div>
 
-      {hasUnsavedChanges && (
-        <button 
-          onClick={handleSaveChanges}
-          className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-800"
-        >
-          Save Changes
-        </button>
-      )}
-    </main>
+          {hasUnsavedChanges && (
+            <button 
+              onClick={handleSaveChanges}
+              className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-800"
+            >
+              Save Changes
+            </button>
+          )}
+        </main>
+      </div>
+      <div className="w-full h-[900px] bg-black" />
+    </>
   );
 }
