@@ -29,10 +29,7 @@ export default function DraggableImage({
       nodeRef={nodeRef}
       position={localPosition}
       onStart={() => setIsDragging(true)}
-      onStop={() => {
-        setIsDragging(false);
-        onPositionChange(localPosition);
-      }}
+      onStop={() => setIsDragging(false)}
       onDrag={(_, data) => {
         const newPosition = { x: data.x, y: data.y };
         setLocalPosition(newPosition);
@@ -41,56 +38,67 @@ export default function DraggableImage({
     >
       <div 
         ref={nodeRef} 
-        className={`${className} pointer-events-auto`}
         style={{ 
           position: 'absolute',
-          zIndex: isDragging ? 1001 : 1000,
           cursor: isDragging ? 'grabbing' : 'grab',
+          zIndex: isDragging ? 1000 : 'auto',
         }}
+        className={className}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <div
           style={{
-            boxShadow: isDragging ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
-            outline: isHovered ? '2px solid #3b82f6' : 'none',
-            outlineOffset: '4px',
+            transform: `scale(${scale})`,
+            transition: 'transform 0.3s ease-in-out, box-shadow 0.2s ease-in-out',
+            transformOrigin: 'bottom right',
+            outline: isHovered ? '1px solid black' : 'none',
+            borderRadius: '2px',
+            padding: '8px',
+            border: isDragging 
+              ? '1px solid #E5E5E5'
+              : '1px solid #F0F0F0',
           }}
-          className="rounded-lg relative overflow-visible"
+          className="flex flex-col gap-2"
         >
-          <div
-            style={{
-              transform: `scale(${scale})`,
-              transition: 'transform 0.3s ease-in-out',
-              transformOrigin: 'center center',
-            }}
-          >
-            <Image
-              src={image.src}
-              alt={image.alt}
-              width={image.width}
-              height={image.height}
-              className="rounded-lg select-none"
-              style={{ maxWidth: '100%', height: 'auto' }}
-              draggable={false}
-              priority
-            />
-          </div>
-          {isHovered && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleSize?.();
-              }}
-              className="absolute bottom-2 left-2 text-xs bg-black/75 text-white px-2 py-1 rounded hover:bg-black/90 transition-colors"
-              style={{
-                transform: 'scale(1)',  // Force button to maintain size
-                transformOrigin: 'bottom left',
-              }}
+          <Image
+            src={image.src}
+            alt={image.alt}
+            width={image.width}
+            height={image.height}
+            className="rounded-lg select-none"
+            style={{ maxWidth: '100%', height: 'auto' }}
+            draggable={false}
+            priority
+          />
+          <div className="w-full flex justify-between items-center">
+            <div 
+              className="!text-xs text-gray-700"
+              style={{ fontSize: '0.75rem' }}
             >
-              {image.isExpanded ? 'Shrink' : 'Expand'}
-            </button>
-          )}
+              {image.description}
+            </div>
+            {isHovered && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleSize?.();
+                }}
+                className="!text-xs text-gray-700 hover:text-black transition-colors"
+                style={{
+                  fontSize: '0.75rem',
+                  border: 'none',
+                  borderBottom: '1px solid currentColor',
+                  padding: 0,
+                  margin: 0,
+                  background: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                {image.isExpanded ? 'Shrink' : 'Expand'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </Draggable>

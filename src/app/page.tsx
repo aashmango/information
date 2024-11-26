@@ -119,9 +119,10 @@ export default function Home() {
           position: 'relative',
           width: '100%',
           minHeight: `${contentHeight}px`,
+          backgroundColor: 'white',
         }}
       >
-        <main className="p-8 bg-white relative">
+        <main className="p-8 relative">
           <DisplayFilters
             showImages={showImages}
             showText={showText}

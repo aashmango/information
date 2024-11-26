@@ -38,15 +38,18 @@ export default function DraggableText({ text, position, onPositionChange, id, cl
         <div
           className="bg-gray-50 rounded-full select-none"
           style={{
-            boxShadow: isDragging 
-              ? '0 4px 12px rgba(0, 0, 0, 0.1)' 
-              : '0 1px 2px rgba(0, 0, 0, 0.1)',
             transition: 'all 0.1s ease-in-out',
-            outline: isHovered ? '2px solid #3b82f6' : 'none',
-            outlineOffset: '4px',
+            border: isHovered ? '1px solid #E5E5E5' : 'none',
+            borderRadius: '2px',
+            padding: '4px',
+            backgroundColor: isHovered ? 'white' : 'transparent',
+            zIndex: isDragging ? 1000 : 'auto',
           }}
         >
-          <p className="text-black leading-relaxed p-8 border-2 border-gray-200 rounded-full">
+          <p 
+            className="text-black leading-relaxed p-8 border-2 border-gray-200 rounded-full"
+            style={{ margin: 0 }}
+          >
             {text.content}
           </p>
         </div>

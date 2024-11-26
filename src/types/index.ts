@@ -12,6 +12,7 @@ export interface ImageItem {
   current_position: Position;
   default_position: Position;
   isExpanded?: boolean;
+  description?: string;
 }
 
 export interface TextBlock {
@@ -32,6 +33,7 @@ export interface DatabaseImage {
   width: number;
   height: number;
   created_at: string;
+  description?: string;
 }
 
 export interface DatabaseText {

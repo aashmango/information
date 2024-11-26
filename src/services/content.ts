@@ -26,30 +26,20 @@ export const contentService = {
       this.handleError(error, 'fetching images');
     }
 
-    const mappedData = (data as DatabaseImage[]).map(img => {
-      const fallbackPosition = { x: 0, y: 0 };
-      const currentPosition = (img.current_position && 
-        typeof img.current_position.x === 'number' && 
-        typeof img.current_position.y === 'number')
-        ? img.current_position 
-        : fallbackPosition;
-
-      const defaultPosition = {
+    const mappedData = (data as DatabaseImage[]).map(img => ({
+      id: img.id,
+      src: img.src,
+      alt: img.alt,
+      current_position: img.current_position || { x: 0, y: 0 },
+      default_position: {
         x: img.default_position_x,
         y: img.default_position_y
-      };
-
-      return {
-        id: img.id,
-        src: img.src,
-        alt: img.alt,
-        current_position: currentPosition,
-        default_position: defaultPosition,
-        width: img.width,
-        height: img.height,
-        isExpanded: false
-      };
-    });
+      },
+      width: img.width,
+      height: img.height,
+      isExpanded: false,
+      description: img.description
+    }));
 
     return mappedData;
   },
