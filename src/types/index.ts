@@ -13,6 +13,10 @@ export interface ImageItem {
   default_position: Position;
   isExpanded?: boolean;
   description?: string;
+  thumbnail_url?: string;
+  original_url?: string;
+  thumbnail_width?: number;
+  thumbnail_height?: number;
 }
 
 export interface TextBlock {
@@ -34,6 +38,10 @@ export interface DatabaseImage {
   height: number;
   created_at: string;
   description?: string;
+  thumbnail_url?: string;
+  original_url?: string;
+  thumbnail_width?: number;
+  thumbnail_height?: number;
 }
 
 export interface DatabaseText {

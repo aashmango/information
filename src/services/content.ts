@@ -28,7 +28,7 @@ export const contentService = {
 
     const mappedData = (data as DatabaseImage[]).map(img => ({
       id: img.id,
-      src: img.src,
+      src: img.thumbnail_url || img.src,
       alt: img.alt,
       current_position: img.current_position || { x: 0, y: 0 },
       default_position: {
@@ -38,7 +38,9 @@ export const contentService = {
       width: img.width,
       height: img.height,
       isExpanded: false,
-      description: img.description
+      description: img.description,
+      thumbnail_url: img.thumbnail_url,
+      original_url: img.original_url
     }));
 
     return mappedData;

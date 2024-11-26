@@ -21,7 +21,14 @@ export default function DraggableImage({
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const scale = image.isExpanded ? 1.5 : 1;
+  // Define dimensions based on expanded state
+  const dimensions = {
+    thumbnail: { width: 300, height: Math.round(300 * (image.height / image.width)) },
+    expanded: { width: 600, height: Math.round(600 * (image.height / image.width)) }
+  };
+
+  const currentDimensions = image.isExpanded ? dimensions.expanded : dimensions.thumbnail;
+  const currentSrc = image.isExpanded ? (image.original_url || image.src) : (image.thumbnail_url || image.src);
 
   return (
     <Draggable
@@ -50,9 +57,7 @@ export default function DraggableImage({
       >
         <div
           style={{
-            transform: `scale(${scale})`,
-            transition: 'transform 0.3s ease-in-out, box-shadow 0.2s ease-in-out',
-            transformOrigin: 'bottom right',
+            transition: 'box-shadow 0.2s ease-in-out',
             borderRadius: '2px',
             padding: '8px',
             border: `1px solid ${isHovered ? '#A0A0A0' : isDragging ? '#E5E5E5' : '#F0F0F0'}`,
@@ -64,14 +69,14 @@ export default function DraggableImage({
           className="flex flex-col gap-2"
         >
           <Image
-            src={image.src}
+            src={currentSrc}
             alt={image.alt}
-            width={image.width}
-            height={image.height}
+            width={currentDimensions.width}
+            height={currentDimensions.height}
             className="rounded-lg select-none"
             style={{ maxWidth: '100%', height: 'auto' }}
             draggable={false}
-            priority
+            priority={image.isExpanded}
           />
           <div className="w-full flex justify-between items-center">
             <div 
