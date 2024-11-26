@@ -3,16 +3,19 @@ export interface Position {
   y: number;
 }
 
-export interface ImageItem {
+interface MediaItem {
   id: string;
   src: string;
-  alt: string;
   width: number;
   height: number;
   current_position: Position;
   default_position: Position;
   isExpanded?: boolean;
   description?: string;
+}
+
+export interface ImageItem extends MediaItem {
+  alt: string;
   thumbnail_url?: string;
   original_url?: string;
   thumbnail_width?: number;
@@ -27,17 +30,21 @@ export interface TextBlock {
   default_position: Position;
 }
 
-export interface DatabaseImage {
-  id: string;
-  src: string;
+interface DatabaseMediaItem {
+  id: string;           // uuid
+  src: string;          // text
+  width: number;        // integer
+  height: number;       // integer
+  default_position_x: number;  // integer
+  default_position_y: number;  // integer
+  current_position?: Position; // jsonb
+  description?: string;        // text
+  created_at: string;         // timestamp with time zone
+  updated_at: string;         // timestamp with time zone
+}
+
+export interface DatabaseImage extends DatabaseMediaItem {
   alt: string;
-  default_position_x: number;
-  default_position_y: number;
-  current_position?: Position;
-  width: number;
-  height: number;
-  created_at: string;
-  description?: string;
   thumbnail_url?: string;
   original_url?: string;
   thumbnail_width?: number;
@@ -52,6 +59,10 @@ export interface DatabaseText {
   current_position?: Position;
   width: number;
   created_at: string;
+}
+
+export interface DatabaseVideo extends DatabaseMediaItem {
+  // No additional fields needed based on the schema
 }
 
 export interface DraggableProps {
@@ -70,4 +81,11 @@ export interface SavePositionsPayload {
     id: string;
     position: Position;
   }>;
+}
+
+export interface VideoItem extends MediaItem {
+  type: 'video';
+  autoplay?: boolean;
+  loop?: boolean;
+  muted?: boolean;
 }

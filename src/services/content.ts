@@ -1,9 +1,10 @@
 import { supabase } from '@/lib/supabase'
-import { ImageItem, TextBlock, DatabaseImage, DatabaseText, Position } from '@/types'
+import { ImageItem, TextBlock, DatabaseImage, DatabaseText, Position, VideoItem, DatabaseVideo } from '@/types'
 
 interface SavePositionsPayload {
   images: Array<{ id: string; position: Position; description: string }>;
   textBlocks: Array<{ id: string; position: Position }>;
+  videos: Array<{ id: string; position: Position; description: string }>;
 }
 
 export const contentService = {
@@ -70,8 +71,37 @@ export const contentService = {
     })
   },
 
+  async fetchVideos(): Promise<VideoItem[]> {
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      this.handleError(error, 'fetching videos');
+    }
+
+    return (data as DatabaseVideo[]).map(video => ({
+      id: video.id,
+      src: video.src,
+      type: 'video',
+      width: video.width,
+      height: video.height,
+      current_position: video.current_position || { x: 0, y: 0 },
+      default_position: {
+        x: video.default_position_x,
+        y: video.default_position_y
+      },
+      description: video.description,
+      isExpanded: false,
+      autoplay: true,
+      loop: true,
+      muted: true
+    }));
+  },
+
   async updatePosition(
-    table: 'images' | 'text_blocks',
+    table: 'images' | 'text_blocks' | 'videos',
     id: string, 
     position: Position
   ): Promise<void> {
@@ -85,7 +115,7 @@ export const contentService = {
     }
   },
 
-  async savePositions({ images, textBlocks }: SavePositionsPayload): Promise<void> {
+  async savePositions({ images, textBlocks, videos }: SavePositionsPayload): Promise<void> {
     try {
       // Save image positions
       for (const { id, position, description } of images) {
@@ -108,6 +138,18 @@ export const contentService = {
 
         if (error) {
           throw new Error(`Failed to update text block ${id}: ${error.message}`);
+        }
+      }
+
+      // Save video positions
+      for (const { id, position, description } of videos) {
+        const { error } = await supabase
+          .from('videos')
+          .update({ current_position: position, description })
+          .eq('id', id);
+
+        if (error) {
+          throw new Error(`Failed to update video ${id}: ${error.message}`);
         }
       }
     } catch (error) {

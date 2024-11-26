@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ImageItem, TextBlock, Position } from '@/types';
+import { ImageItem, TextBlock, Position, VideoItem } from '@/types';
 import { contentService } from '@/services/content';
 import DraggableImage from '@/components/DraggableImage';
 import DraggableText from '@/components/DraggableText';
 import DisplayFilters from '@/components/DisplayFilters';
 import Minimap from '@/components/Minimap';
+import DraggableVideo from '@/components/DraggableVideo';
 
 const FILTER_NAV_HEIGHT = 22;
 
@@ -16,19 +17,25 @@ export default function Home() {
   const [showText, setShowText] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [scrollPosition, setScrollPosition] = useState({ x: 0, y: 0 });
+  const [videos, setVideos] = useState<VideoItem[]>([]);
 
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const [images, texts] = await Promise.all([
+        const [images, texts, videos] = await Promise.all([
           contentService.fetchImages(),
-          contentService.fetchTextBlocks()
+          contentService.fetchTextBlocks(),
+          contentService.fetchVideos()
         ]);
         
         const defaultPosition = { x: 0, y: 0 };
         setImages(images.map(img => ({
           ...img,
           current_position: img.current_position || defaultPosition
+        })));
+        setVideos(videos.map(video => ({
+          ...video,
+          current_position: video.current_position || defaultPosition
         })));
         setTextBlocks(texts.map(text => ({
           ...text,
@@ -57,25 +64,35 @@ export default function Home() {
   const handlePositionChange = useCallback((
     id: string,
     newPosition: Position,
-    isImage: boolean
+    type: 'image' | 'text' | 'video'
   ) => {
     const snappedPosition = {
       x: Math.round(newPosition.x / 16) * 16,
       y: Math.round(newPosition.y / 16) * 16
     };
 
-    if (isImage) {
-      setImages(prev => prev.map(item =>
-        item.id === id
-          ? { ...item, current_position: snappedPosition }
-          : item
-      ));
-    } else {
-      setTextBlocks(prev => prev.map(item =>
-        item.id === id
-          ? { ...item, current_position: snappedPosition }
-          : item
-      ));
+    switch (type) {
+      case 'image':
+        setImages(prev => prev.map(item =>
+          item.id === id
+            ? { ...item, current_position: snappedPosition }
+            : item
+        ));
+        break;
+      case 'video':
+        setVideos(prev => prev.map(item =>
+          item.id === id
+            ? { ...item, current_position: snappedPosition }
+            : item
+        ));
+        break;
+      case 'text':
+        setTextBlocks(prev => prev.map(item =>
+          item.id === id
+            ? { ...item, current_position: snappedPosition }
+            : item
+        ));
+        break;
     }
     setHasUnsavedChanges(true);
   }, []);
@@ -95,6 +112,11 @@ export default function Home() {
           position: { x, y },
           description: description ?? ''
         })),
+        videos: videos.map(({ id, current_position: { x, y }, description }) => ({
+          id,
+          position: { x, y },
+          description: description ?? ''
+        })),
         textBlocks: textBlocks.map(({ id, current_position: { x, y } }) => ({
           id,
           position: { x, y }
@@ -106,7 +128,7 @@ export default function Home() {
       console.error('Failed to save positions:', error);
       alert('Failed to save!');
     }
-  }, [images, textBlocks]);
+  }, [images, videos, textBlocks]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -164,9 +186,21 @@ export default function Home() {
           id={image.id}
           position={image.current_position}
           image={image}
-          onPositionChange={(pos) => handlePositionChange(image.id, pos, true)}
+          onPositionChange={(pos) => handlePositionChange(image.id, pos, 'image')}
           onToggleSize={() => handleToggleSize(image.id)}
           onDescriptionChange={(desc) => handleDescriptionChange(image.id, desc)}
+        />
+      ))}
+
+      {showImages && videos.map(video => (
+        <DraggableVideo
+          key={video.id}
+          id={video.id}
+          position={video.current_position}
+          video={video}
+          onPositionChange={(pos) => handlePositionChange(video.id, pos, 'video')}
+          onToggleSize={() => handleToggleSize(video.id)}
+          onDescriptionChange={(desc) => handleDescriptionChange(video.id, desc)}
         />
       ))}
 
@@ -176,7 +210,7 @@ export default function Home() {
           id={text.id}
           text={text.content}
           position={text.current_position}
-          onPositionChange={(pos) => handlePositionChange(text.id, pos, false)}
+          onPositionChange={(pos) => handlePositionChange(text.id, pos, 'text')}
         />
       ))}
 
