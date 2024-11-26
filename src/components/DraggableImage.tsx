@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import Image from 'next/image';
 import { ImageItem, DraggableProps } from '@/types';
@@ -7,6 +7,7 @@ interface Props extends DraggableProps {
   image: ImageItem;
   className?: string;
   onToggleSize?: () => void;
+  onDescriptionChange?: (newDescription: string) => void;
 }
 
 export default function DraggableImage({ 
@@ -15,11 +16,13 @@ export default function DraggableImage({
   onPositionChange, 
   id, 
   className,
-  onToggleSize 
+  onToggleSize,
+  onDescriptionChange = () => {}
 }: Props) {
-  const nodeRef = useRef(null);
+  const nodeRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Define dimensions based on expanded state
   const dimensions = {
@@ -29,6 +32,20 @@ export default function DraggableImage({
 
   const currentDimensions = image.isExpanded ? dimensions.expanded : dimensions.thumbnail;
   const currentSrc = image.isExpanded ? (image.original_url || image.src) : (image.thumbnail_url || image.src);
+
+  // Handle clicks outside the component to exit edit mode
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (nodeRef.current && !nodeRef.current.contains(event.target as Node)) {
+        setIsEditing(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [nodeRef]);
 
   return (
     <Draggable
@@ -79,12 +96,51 @@ export default function DraggableImage({
             priority={image.isExpanded}
           />
           <div className="w-full flex justify-between items-center">
-            <div 
-              className="!text-xs text-gray-700"
-              style={{ fontSize: '0.75rem' }}
-            >
-              {image.description}
-            </div>
+            {!isEditing ? (
+              <div 
+                className="!text-xs text-gray-700"
+                style={{ 
+                  fontSize: '0.75rem', 
+                  cursor: 'pointer', 
+                  maxWidth: `${currentDimensions.width}px`, 
+                  lineHeight: '1.5', 
+                  textAlign: 'left',
+                  whiteSpace: 'pre-wrap', // Preserve line breaks
+                  overflowWrap: 'break-word', // Break long words
+                  minHeight: '1.5em', // Ensure consistent height
+                  color: '#A0A0A0' // Muted gray color
+                }}
+                onClick={() => setIsEditing(true)}
+              >
+                {image.description}
+              </div>
+            ) : (
+              <textarea
+                value={image.description}
+                onChange={(e) => onDescriptionChange(e.target.value)}
+                placeholder="Edit description"
+                style={{ 
+                  width: `${currentDimensions.width}px`, 
+                  marginTop: '8px',
+                  lineHeight: '1.5', // Match line height
+                  minHeight: '1.5em', // Ensure consistent height
+                  resize: 'none', // Disable manual resizing
+                  overflow: 'hidden', // Hide overflow to prevent scrollbars
+                  fontSize: '0.75rem' // Explicitly set font size to match the div
+                }}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setIsEditing(false);
+                  }
+                }}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = 'auto'; // Reset height
+                  target.style.height = `${target.scrollHeight}px`; // Set to scroll height
+                }}
+              />
+            )}
             {isHovered && (
               <button
                 onClick={(e) => {
@@ -102,7 +158,7 @@ export default function DraggableImage({
                   cursor: 'pointer',
                 }}
               >
-                {image.isExpanded ? 'Shrink' : 'Expand'}
+                {image.isExpanded ? 'Small' : 'Big'}
               </button>
             )}
           </div>

@@ -80,12 +80,20 @@ export default function Home() {
     setHasUnsavedChanges(true);
   }, []);
 
+  const handleDescriptionChange = useCallback((id: string, newDescription: string) => {
+    setImages(prev => prev.map(img =>
+      img.id === id ? { ...img, description: newDescription } : img
+    ));
+    setHasUnsavedChanges(true);
+  }, []);
+
   const handleSaveChanges = useCallback(async () => {
     try {
       await contentService.savePositions({
-        images: images.map(({ id, current_position: { x, y } }) => ({
+        images: images.map(({ id, current_position: { x, y }, description }) => ({
           id,
-          position: { x, y }
+          position: { x, y },
+          description
         })),
         textBlocks: textBlocks.map(({ id, current_position: { x, y } }) => ({
           id,
@@ -153,6 +161,7 @@ export default function Home() {
           image={image}
           onPositionChange={(pos) => handlePositionChange(image.id, pos, true)}
           onToggleSize={() => handleToggleSize(image.id)}
+          onDescriptionChange={(desc) => handleDescriptionChange(image.id, desc)}
         />
       ))}
 

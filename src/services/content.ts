@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 import { ImageItem, TextBlock, DatabaseImage, DatabaseText, Position } from '@/types'
 
 interface SavePositionsPayload {
-  images: Array<{ id: string; position: Position }>;
+  images: Array<{ id: string; position: Position; description: string }>;
   textBlocks: Array<{ id: string; position: Position }>;
 }
 
@@ -85,13 +85,13 @@ export const contentService = {
     }
   },
 
-  async savePositions(changes: SavePositionsPayload): Promise<void> {
+  async savePositions({ images, textBlocks }: SavePositionsPayload): Promise<void> {
     try {
       // Save image positions
-      for (const { id, position } of changes.images) {
+      for (const { id, position, description } of images) {
         const { error } = await supabase
           .from('images')
-          .update({ current_position: position })
+          .update({ current_position: position, description })
           .eq('id', id);
 
         if (error) {
@@ -100,7 +100,7 @@ export const contentService = {
       }
 
       // Save text block positions
-      for (const { id, position } of changes.textBlocks) {
+      for (const { id, position } of textBlocks) {
         const { error } = await supabase
           .from('text_blocks')
           .update({ current_position: position })
