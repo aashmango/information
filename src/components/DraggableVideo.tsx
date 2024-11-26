@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { VideoItem, DraggableProps } from '@/types';
+import { useZIndex } from '@/utils/ZIndexContext';
 
 interface Props extends DraggableProps {
   video: VideoItem;
@@ -23,6 +24,9 @@ export default function DraggableVideo({
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [zIndex, setZIndex] = useState(1);
+  const { getNextZIndex } = useZIndex();
 
   // Define dimensions based on expanded state
   const dimensions = {
@@ -45,6 +49,10 @@ export default function DraggableVideo({
     };
   }, [nodeRef]);
 
+  const bringToFront = () => {
+    setZIndex(getNextZIndex());
+  };
+
   return (
     <Draggable
       nodeRef={nodeRef}
@@ -52,8 +60,13 @@ export default function DraggableVideo({
       grid={[16, 16]}
       offsetParent={document.body}
       scale={1}
-      onStart={() => setIsDragging(true)}
-      onStop={() => setIsDragging(false)}
+      onStart={() => {
+        setIsDragging(true);
+        bringToFront();
+      }}
+      onStop={() => {
+        setIsDragging(false);
+      }}
       onDrag={(_, data) => {
         onPositionChange({ x: data.x, y: data.y });
       }}
@@ -63,12 +76,14 @@ export default function DraggableVideo({
         style={{ 
           position: 'absolute',
           cursor: isDragging ? 'grabbing' : 'grab',
-          zIndex: isDragging ? 1000 : 'auto',
+          zIndex,
           backgroundColor: 'white',
           transform: `translate(${position.x}px, ${position.y}px)`,
           transition: 'none',
         }}
         className={className}
+        onClick={bringToFront}
+        onMouseDown={bringToFront}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

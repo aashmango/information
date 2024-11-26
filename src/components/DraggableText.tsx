@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import { TextBlock, DraggableProps, Position } from '@/types';
+import { useZIndex } from '@/utils/ZIndexContext';
 
 interface Props extends DraggableProps {
   text: string;
@@ -18,14 +19,26 @@ export default function DraggableText({ text, position, onPositionChange, id, cl
   const nodeRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [zIndex, setZIndex] = useState(1);
+  const { getNextZIndex } = useZIndex();
+
+  const bringToFront = () => {
+    setZIndex(getNextZIndex());
+  };
 
   return (
     <Draggable
       nodeRef={nodeRef}
       position={position}
       grid={[16, 16]}
-      onStart={() => setIsDragging(true)}
-      onStop={() => setIsDragging(false)}
+      onStart={() => {
+        setIsDragging(true);
+        bringToFront();
+      }}
+      onStop={() => {
+        setIsDragging(false);
+      }}
       onDrag={(_, data) => {
         onPositionChange({ x: data.x, y: data.y });
       }}
@@ -35,9 +48,11 @@ export default function DraggableText({ text, position, onPositionChange, id, cl
         style={{ 
           position: 'absolute',
           cursor: isDragging ? 'grabbing' : 'grab',
-          zIndex: isDragging ? 1000 : 'auto',
+          zIndex,
         }}
         className={className}
+        onClick={bringToFront}
+        onMouseDown={bringToFront}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

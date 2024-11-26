@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import Image from 'next/image';
 import { ImageItem, DraggableProps } from '@/types';
+import { useZIndex } from '@/utils/ZIndexContext';
 
 interface Props extends DraggableProps {
   image: ImageItem;
@@ -23,6 +24,9 @@ export default function DraggableImage({
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [zIndex, setZIndex] = useState(1);
+  const { getNextZIndex } = useZIndex();
 
   // Define dimensions based on expanded state
   const dimensions = {
@@ -53,6 +57,10 @@ export default function DraggableImage({
     };
   }, [nodeRef]);
 
+  const bringToFront = () => {
+    setZIndex(getNextZIndex());
+  };
+
   return (
     <Draggable
       nodeRef={nodeRef}
@@ -60,8 +68,13 @@ export default function DraggableImage({
       grid={[16, 16]}
       offsetParent={document.body}
       scale={1}
-      onStart={() => setIsDragging(true)}
-      onStop={() => setIsDragging(false)}
+      onStart={() => {
+        setIsDragging(true);
+        bringToFront(); // Bring to front when starting drag
+      }}
+      onStop={() => {
+        setIsDragging(false);
+      }}
       onDrag={(_, data) => {
         onPositionChange({ x: data.x, y: data.y });
       }}
@@ -71,12 +84,14 @@ export default function DraggableImage({
         style={{ 
           position: 'absolute',
           cursor: isDragging ? 'grabbing' : 'grab',
-          zIndex: isDragging ? 1000 : 'auto',
+          zIndex, // Use the managed zIndex instead of isActive
           backgroundColor: 'white',
           transform: `translate(${position.x}px, ${position.y}px)`, // Explicit transform
           transition: 'none', // Prevent transition during drag
         }}
         className={className}
+        onClick={bringToFront} // Bring to front on click
+        onMouseDown={bringToFront} // Also bring to front on mouse down
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

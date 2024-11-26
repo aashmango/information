@@ -36,8 +36,9 @@ export default function Minimap({ images, textBlocks, showImages, showText, scro
     if (allItems.length === 0) return { maxX: 0, maxY: 0, minX: 0, minY: 0 };
 
     return allItems.reduce((bounds, item) => {
+      const aspectRatio = ('aspectRatio' in item ? item.aspectRatio : 1) ?? 1;
       const width = 'isExpanded' in item ? (item.isExpanded ? 300 : 150) : 100;
-      const height = 'isExpanded' in item ? (item.isExpanded ? 300 : 150) : 50;
+      const height = width / aspectRatio;
       
       return {
         maxX: Math.max(bounds.maxX, item.current_position.x + width),
@@ -71,43 +72,53 @@ export default function Minimap({ images, textBlocks, showImages, showText, scro
 
   return (
     <div style={minimapStyle}>
-      {showImages && images.map(image => (
-        <div
-          key={image.id}
-          style={{
-            position: 'absolute',
-            left: `${image.current_position.x * scaleX}px`,
-            top: `${image.current_position.y * scaleX}px`,
-            width: `${(image.isExpanded ? 300 : 150) * scaleX}px`,
-            height: `${(image.isExpanded ? 300 : 150) * scaleX}px`,
-            backgroundColor: '#007AFF',
-            opacity: 0.5,
-          }}
-        />
-      ))}
-      {showText && textBlocks.map(text => (
-        <div
-          key={text.id}
-          style={{
-            position: 'absolute',
-            left: `${text.current_position.x * scaleX}px`,
-            top: `${text.current_position.y * scaleX}px`,
-            width: `${100 * scaleX}px`,
-            height: `${50 * scaleX}px`,
-            backgroundColor: '#FF9500',
-            opacity: 0.5,
-          }}
-        />
-      ))}
+      {showImages && images.map(image => {
+        const aspectRatio = image.aspectRatio || 1;
+        const width = (image.isExpanded ? 300 : 150) * scaleX;
+        const height = width / aspectRatio;
+        return (
+          <div
+            key={image.id}
+            style={{
+              position: 'absolute',
+              left: `${image.current_position.x * scaleX}px`,
+              top: `${image.current_position.y * scaleY}px`,
+              width: `${width}px`,
+              height: `${height}px`,
+              backgroundColor: '#007AFF',
+              opacity: 0.5,
+            }}
+          />
+        );
+      })}
+      {showText && textBlocks.map(text => {
+        const aspectRatio = text.aspectRatio || 2;
+        const width = 100 * scaleX;
+        const height = width / aspectRatio;
+        return (
+          <div
+            key={text.id}
+            style={{
+              position: 'absolute',
+              left: `${text.current_position.x * scaleX}px`,
+              top: `${text.current_position.y * scaleY}px`,
+              width: `${width}px`,
+              height: `${height}px`,
+              backgroundColor: '#FF9500',
+              opacity: 0.5,
+            }}
+          />
+        );
+      })}
 
       {/* Viewport indicator */}
       <div
         style={{
           position: 'absolute',
           left: `${scrollPosition.x * scaleX}px`,
-          top: `${scrollPosition.y * scaleX}px`,
+          top: `${scrollPosition.y * scaleY}px`,
           width: `${containerWidth}px`,
-          height: `${typeof window !== 'undefined' ? window.innerHeight * scaleX : 0}px`,
+          height: `${typeof window !== 'undefined' ? window.innerHeight * scaleY : 0}px`,
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           pointerEvents: 'none',
         }}

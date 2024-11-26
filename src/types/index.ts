@@ -12,6 +12,7 @@ interface MediaItem {
   default_position: Position;
   isExpanded?: boolean;
   description?: string;
+  aspectRatio?: number;
 }
 
 export interface ImageItem extends MediaItem {
@@ -28,6 +29,7 @@ export interface TextBlock {
   width: number;
   current_position: Position;
   default_position: Position;
+  aspectRatio?: number;
 }
 
 interface DatabaseMediaItem {
