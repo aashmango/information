@@ -93,7 +93,7 @@ export default function Home() {
         images: images.map(({ id, current_position: { x, y }, description }) => ({
           id,
           position: { x, y },
-          description
+          description: description ?? ''
         })),
         textBlocks: textBlocks.map(({ id, current_position: { x, y } }) => ({
           id,
@@ -169,7 +169,7 @@ export default function Home() {
         <DraggableText
           key={text.id}
           id={text.id}
-          text={text}
+          text={text.content}
           position={text.current_position}
           onPositionChange={(pos) => handlePositionChange(text.id, pos, false)}
         />

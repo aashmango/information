@@ -3,13 +3,15 @@ import Draggable from 'react-draggable';
 import { TextBlock, DraggableProps } from '@/types';
 
 interface Props extends DraggableProps {
-  text: TextBlock;
+  text: string;
   className?: string;
 }
 
-interface Props extends DraggableProps {
-  text: TextBlock;
-  className?: string;
+interface DraggableTextProps {
+  id: string;
+  text: string;
+  position: Position;
+  onPositionChange: (pos: Position) => void;
 }
 
 export default function DraggableText({ text, position, onPositionChange, id, className }: Props) {
@@ -61,7 +63,7 @@ export default function DraggableText({ text, position, onPositionChange, id, cl
               borderRadius: '0px'
             }}
           >
-            {text.content}
+            {text}
           </p>
         </div>
       </div>
