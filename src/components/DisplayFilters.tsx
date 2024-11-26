@@ -12,7 +12,7 @@ interface DisplayFiltersProps {
     onToggleText,
   }: DisplayFiltersProps) {
     return (
-      <div className="absolute top-4 right-4 flex gap-4">
+      <div className="flex justify-end gap-4">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"

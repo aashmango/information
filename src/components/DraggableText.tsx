@@ -48,7 +48,10 @@ export default function DraggableText({ text, position, onPositionChange, id, cl
         >
           <p 
             className="text-black leading-relaxed p-8 border-2 border-gray-200 rounded-full"
-            style={{ margin: 0 }}
+            style={{ 
+              margin: 0,
+              maxWidth: '300px' 
+            }}
           >
             {text.content}
           </p>

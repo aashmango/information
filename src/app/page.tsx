@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ImageItem, TextBlock, Position, SavePositionsPayload } from '@/types';
 import { contentService } from '@/services/content';
 import DraggableImage from '@/components/DraggableImage';
@@ -46,27 +46,7 @@ export default function Home() {
     updateContentHeight();
   }, [images, textBlocks]);
 
-  const handleImagePositionChange = (id: string, newPosition: Position) => {
-    setImages(prevImages => prevImages.map(img =>
-      img.id === id
-        ? { ...img, current_position: newPosition }
-        : img
-    ));
-    setHasUnsavedChanges(true);
-    requestAnimationFrame(updateContentHeight);
-  };
-
-  const handleTextPositionChange = (id: string, newPosition: Position) => {
-    setTextBlocks(prevBlocks => prevBlocks.map(block =>
-      block.id === id
-        ? { ...block, current_position: newPosition }
-        : block
-    ));
-    setHasUnsavedChanges(true);
-    requestAnimationFrame(updateContentHeight);
-  };
-
-  const handleSaveChanges = async () => {
+  const handleSaveChanges = useCallback(async () => {
     try {
       await contentService.savePositions({
         images: images.map(img => ({
@@ -88,6 +68,41 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to save positions:', error);
     }
+  }, [images, textBlocks]);
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.ctrlKey && !event.metaKey && event.key === 's') {
+        event.preventDefault(); // Prevent browser's save dialog
+        console.log('Ctrl+S pressed, hasUnsavedChanges:', hasUnsavedChanges); // Debug log
+        if (hasUnsavedChanges) {
+          handleSaveChanges();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [hasUnsavedChanges, handleSaveChanges]);
+
+  const handleImagePositionChange = (id: string, newPosition: Position) => {
+    setImages(prevImages => prevImages.map(img =>
+      img.id === id
+        ? { ...img, current_position: newPosition }
+        : img
+    ));
+    setHasUnsavedChanges(true);
+    requestAnimationFrame(updateContentHeight);
+  };
+
+  const handleTextPositionChange = (id: string, newPosition: Position) => {
+    setTextBlocks(prevBlocks => prevBlocks.map(block =>
+      block.id === id
+        ? { ...block, current_position: newPosition }
+        : block
+    ));
+    setHasUnsavedChanges(true);
+    requestAnimationFrame(updateContentHeight);
   };
 
   const updateContentHeight = () => {
@@ -120,9 +135,10 @@ export default function Home() {
           width: '100%',
           minHeight: `${contentHeight}px`,
           backgroundColor: 'white',
+          border: '1px solid black',
         }}
       >
-        <main className="p-8 relative">
+        <main className="p-8 relative flex flex-row justify-between">
           <DisplayFilters
             showImages={showImages}
             showText={showText}
@@ -154,15 +170,6 @@ export default function Home() {
               />
             ))}
           </div>
-
-          {hasUnsavedChanges && (
-            <button 
-              onClick={handleSaveChanges}
-              className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded-lg shadow-lg hover:bg-gray-800"
-            >
-              Save Changes
-            </button>
-          )}
         </main>
       </div>
       <div className="w-full h-[900px] bg-black" />

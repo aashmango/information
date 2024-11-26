@@ -52,12 +52,13 @@ export default function DraggableImage({
             transform: `scale(${scale})`,
             transition: 'transform 0.3s ease-in-out, box-shadow 0.2s ease-in-out',
             transformOrigin: 'bottom right',
-            outline: isHovered ? '1px solid black' : 'none',
+            outline: isHovered ? '1px solid #A0A0A0' : 'none',
             borderRadius: '2px',
             padding: '8px',
             border: isDragging 
               ? '1px solid #E5E5E5'
               : '1px solid #F0F0F0',
+            backgroundColor: isHovered ? 'white' : 'transparent',
           }}
           className="flex flex-col gap-2"
         >
