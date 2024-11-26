@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import Draggable from 'react-draggable';
-import { TextBlock, DraggableProps } from '@/types';
+import { TextBlock, DraggableProps, Position } from '@/types';
 
 interface Props extends DraggableProps {
   text: string;
