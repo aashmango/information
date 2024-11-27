@@ -27,9 +27,14 @@ interface ToolbarProps {
       cursor: 'pointer',
       marginRight: '10px',
       fontSize: '12px',
-      fontWeight: 'bold',
-      textTransform: 'uppercase' as const,
+      fontWeight: '600',
       transition: 'background-color 0.3s',
+    };
+  
+    const activeButtonStyle = {
+      ...buttonStyle,
+      backgroundColor: '#d0d0d0',
+      color: '#000',
     };
   
     return (
@@ -65,12 +70,22 @@ interface ToolbarProps {
         >
           Add Text
         </button>
-        <DisplayFilters
-          showImages={showImages}
-          showText={showText}
-          onToggleImages={onToggleImages}
-          onToggleText={onToggleText}
-        />
+        <button
+          onClick={() => onToggleImages(!showImages)}
+          style={showImages ? activeButtonStyle : buttonStyle}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = showImages ? '#c0c0c0' : '#e0e0e0'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = showImages ? '#d0d0d0' : '#f0f0f0'}
+        >
+          Images
+        </button>
+        <button
+          onClick={() => onToggleText(!showText)}
+          style={showText ? activeButtonStyle : buttonStyle}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = showText ? '#c0c0c0' : '#e0e0e0'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = showText ? '#d0d0d0' : '#f0f0f0'}
+        >
+          Text
+        </button>
         <Link 
           href="/list"
           style={{
