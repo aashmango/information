@@ -28,18 +28,14 @@ export default function Toolbar({
         border: 'none',
         borderRadius: '20px',
         cursor: 'pointer',
-        marginRight: '10px',
         fontSize: '12px',
-        fontWeight: '600',
-        transition: 'background-color 0.3s, opacity 0.3s 2s',
-        opacity: isExpanded ? 1 : 0,
+        fontWeight: '600'
     };
 
     const activeButtonStyle = {
         ...buttonStyle,
         backgroundColor: '#000',
         color: '#fff',
-        fontWeight: '600',
     };
 
     const dividerStyle = {
