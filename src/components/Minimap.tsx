@@ -30,6 +30,9 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
   }, []);
 
   const getBounds = () => {
+    if (typeof window === 'undefined') {
+      return { maxX: 0, maxY: 0, minX: 0, minY: 0 };
+    }
     const allItems = [
       ...(showImages ? images : []),
       ...(showText ? textBlocks : []),
@@ -59,8 +62,8 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
   };
 
   const bounds = getBounds();
-  const contentWidth = Math.max(bounds.maxX - bounds.minX, window.innerWidth);
-  const contentHeight = Math.max(bounds.maxY - bounds.minY, window.innerHeight);
+  const contentWidth = Math.max(bounds.maxX - bounds.minX, typeof window !== 'undefined' ? window.innerWidth : 0);
+  const contentHeight = Math.max(bounds.maxY - bounds.minY, typeof window !== 'undefined' ? window.innerHeight : 0);
 
   const scaleX = containerWidth / contentWidth;
   const scaleY = containerHeight / contentHeight;
@@ -73,8 +76,8 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
     containerWidth,
     containerHeight,
     scale,
-    windowInnerWidth: window.innerWidth,
-    windowInnerHeight: window.innerHeight
+    windowInnerWidth: typeof window !== 'undefined' ? window.innerWidth : 0,
+    windowInnerHeight: typeof window !== 'undefined' ? window.innerHeight : 0
   });
 
   const minimapStyle: CSSProperties = {
@@ -156,8 +159,8 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
           position: 'absolute',
           left: `${scrollPosition.x * scale}px`,
           top: `${scrollPosition.y * scale}px`,
-          width: `${window.innerWidth * scale}px`,
-          height: `${window.innerHeight * scale}px`,
+          width: `${typeof window !== 'undefined' ? window.innerWidth * scale : 0}px`,
+          height: `${typeof window !== 'undefined' ? window.innerHeight * scale : 0}px`,
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           border: '1px solid rgba(0, 0, 0, 0.3)',
           pointerEvents: 'none',
