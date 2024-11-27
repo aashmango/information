@@ -128,7 +128,7 @@ export default function DraggableImage({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (image.isExpanded) onToggleSize?.();
+                  onToggleSize?.();
                 }}
                 className="!text-xs transition-colors"
                 style={{
@@ -157,7 +157,7 @@ export default function DraggableImage({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (!image.isExpanded) onToggleSize?.();
+                  onToggleSize?.();
                 }}
                 className="!text-xs transition-colors"
                 style={{

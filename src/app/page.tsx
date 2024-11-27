@@ -146,14 +146,16 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [hasUnsavedChanges, handleSaveChanges]);
 
-  const handleToggleSize = useCallback((id: string) => {
-    setImages(prev => prev.map(img =>
-      img.id === id ? { 
-        ...img, 
-        isExpanded: !img.isExpanded,
-        src: !img.isExpanded ? (img.original_url || img.src) : (img.thumbnail_url || img.src)
-      } : img
-    ));
+  const handleToggleSize = useCallback((id: string, type: 'image' | 'video') => {
+    if (type === 'image') {
+      setImages(prev => prev.map(img =>
+        img.id === id ? { ...img, isExpanded: !img.isExpanded } : img
+      ));
+    } else if (type === 'video') {
+      setVideos(prev => prev.map(video =>
+        video.id === id ? { ...video, isExpanded: !video.isExpanded } : video
+      ));
+    }
     setHasUnsavedChanges(true);
   }, []);
 
@@ -234,6 +236,14 @@ export default function Home() {
               aspectRatio: baseWidth / totalHeight
             };
           })}
+          videos={videos.map(video => ({
+            ...video,
+            width: video.isExpanded ? 600 : 300,
+            aspectRatio: (video.isExpanded ? 600 : 300) / 
+              (Math.round((video.isExpanded ? 600 : 300) * (video.height / video.width)) + 
+               calculateDescriptionHeight(video.description) + 
+               PADDING)
+          }))}
           textBlocks={textBlocks.map(text => ({
             ...text,
             width: text.width,
@@ -241,6 +251,7 @@ export default function Home() {
           }))}
           showImages={showImages}
           showText={showText}
+          showVideos={showImages}
           scrollPosition={scrollPosition}
           containerWidth={100}
           containerHeight={200}
@@ -253,7 +264,7 @@ export default function Home() {
             position={image.current_position}
             image={image}
             onPositionChange={(pos) => handlePositionChange(image.id, pos, 'image')}
-            onToggleSize={() => handleToggleSize(image.id)}
+            onToggleSize={() => handleToggleSize(image.id, 'image')}
             onDescriptionChange={(desc) => handleDescriptionChange(image.id, desc)}
           />
         ))}
@@ -265,7 +276,7 @@ export default function Home() {
             position={video.current_position}
             video={video}
             onPositionChange={(pos) => handlePositionChange(video.id, pos, 'video')}
-            onToggleSize={() => handleToggleSize(video.id)}
+            onToggleSize={() => handleToggleSize(video.id, 'video')}
             onDescriptionChange={(desc) => handleDescriptionChange(video.id, desc)}
           />
         ))}
