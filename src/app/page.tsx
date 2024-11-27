@@ -10,6 +10,7 @@ import DraggableVideo from '@/components/DraggableVideo';
 import { getItemDimensions, gridLayout, calculateDescriptionHeight, DEFAULT_TEXT_HEIGHT, PADDING } from '@/utils/layoutAlgorithms';
 import { ZIndexProvider } from '@/utils/ZIndexContext';
 import { v4 as uuidv4 } from 'uuid';
+import Toolbar from '@/components/Toolbar';
 
 const FILTER_NAV_HEIGHT = 22;
 const TOOLBAR_HEIGHT = 40;
@@ -349,69 +350,14 @@ export default function Home() {
           />
         ))}
 
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          padding: '8px',
-          height: '40px',
-          backgroundColor: 'white',
-          border: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: '20px',
-          zIndex: 1000,
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        }}>
-          <button 
-            onClick={handleCleanupLayout}
-            style={{
-              padding: '4px 8px',
-              backgroundColor: '#f0f0f0',
-              color: '#333',
-              border: 'none',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              marginRight: '10px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              textTransform: 'uppercase',
-              transition: 'background-color 0.3s',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-          >
-            Clean Up Layout
-          </button>
-          <button 
-            onClick={handleAddTextBlock}
-            style={{
-              padding: '4px 8px',
-              backgroundColor: '#f0f0f0',
-              color: '#333',
-              border: 'none',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              marginRight: '10px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              textTransform: 'uppercase',
-              transition: 'background-color 0.3s',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-          >
-            Add Text
-          </button>
-          <DisplayFilters
-            showImages={showImages}
-            showText={showText}
-            onToggleImages={setShowImages}
-            onToggleText={setShowText}
-          />
-        </div>
+        <Toolbar
+          onCleanupLayout={handleCleanupLayout}
+          onAddTextBlock={handleAddTextBlock}
+          showImages={showImages}
+          showText={showText}
+          onToggleImages={setShowImages}
+          onToggleText={setShowText}
+        />
       </main>
     </ZIndexProvider>
   );
