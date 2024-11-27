@@ -80,9 +80,8 @@ export function gridLayout(items: ItemWithDimensions[]): Position[] {
   const columns: number[] = new Array(columnCount).fill(ROW_GAP);
   const positions: Position[] = [];
 
-  // Calculate starting X position to center the grid
-  const totalWidth = (columnCount * COLUMN_WIDTH) + ((columnCount - 1) * COLUMN_GAP);
-  const startX = (containerWidth - totalWidth) / 2;
+  // Set starting X position to 40 for left alignment with padding
+  const startX = 40;
 
   items.forEach((item) => {
     // Find the shortest column

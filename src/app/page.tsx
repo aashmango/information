@@ -282,28 +282,37 @@ export default function Home() {
 
         <div style={{
           position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: '50px',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          padding: '8px',
+          height: '40px',
           backgroundColor: 'white',
-          borderTop: '1px solid #ccc',
+          border: '1px solid #e0e0e0',
           display: 'flex',
           alignItems: 'center',
-          padding: '0 20px',
+          justifyContent: 'center',
+          borderRadius: '20px',
           zIndex: 1000,
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         }}>
           <button 
             onClick={handleCleanupLayout}
             style={{
               padding: '4px 8px',
-              backgroundColor: '#007bff',
-              color: 'white',
+              backgroundColor: '#f0f0f0',
+              color: '#333',
               border: 'none',
-              borderRadius: '4px',
+              borderRadius: '20px',
               cursor: 'pointer',
-              marginRight: '20px',
+              marginRight: '10px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              transition: 'background-color 0.3s',
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
           >
             Clean Up Layout
           </button>
