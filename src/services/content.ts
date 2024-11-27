@@ -3,7 +3,7 @@ import { ImageItem, TextBlock, DatabaseImage, DatabaseText, Position, VideoItem,
 
 interface SavePositionsPayload {
   images: Array<{ id: string; position: Position; description: string }>;
-  textBlocks: Array<{ id: string; position: Position }>;
+  textBlocks: Array<{ id: string; position: Position; content: string }>;
   videos: Array<{ id: string; position: Position; description: string }>;
 }
 
@@ -129,11 +129,14 @@ export const contentService = {
         }
       }
 
-      // Save text block positions
-      for (const { id, position } of textBlocks) {
+      // Save text block positions and content
+      for (const { id, position, content } of textBlocks) {
         const { error } = await supabase
           .from('text_blocks')
-          .update({ current_position: position })
+          .update({ 
+            current_position: position,
+            content: content
+          })
           .eq('id', id);
 
         if (error) {
@@ -154,6 +157,27 @@ export const contentService = {
       }
     } catch (error) {
       throw error;
+    }
+  },
+
+  async createTextBlock(textBlock: TextBlock): Promise<void> {
+    const { error } = await supabase
+      .from('text_blocks')
+      .insert([textBlock]);
+
+    if (error) {
+      throw new Error(`Failed to create text block: ${error.message}`);
+    }
+  },
+
+  async deleteTextBlock(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('text_blocks')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      this.handleError(error, 'deleting text block');
     }
   }
 }

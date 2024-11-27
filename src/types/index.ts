@@ -78,10 +78,17 @@ export interface SavePositionsPayload {
   images: Array<{
     id: string;
     position: Position;
+    description: string;
+  }>;
+  videos: Array<{
+    id: string;
+    position: Position;
+    description: string;
   }>;
   textBlocks: Array<{
     id: string;
     position: Position;
+    content: string;
   }>;
 }
 

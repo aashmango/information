@@ -9,8 +9,11 @@ import Minimap from '@/components/Minimap';
 import DraggableVideo from '@/components/DraggableVideo';
 import { getItemDimensions, gridLayout, calculateDescriptionHeight, DEFAULT_TEXT_HEIGHT, PADDING } from '@/utils/layoutAlgorithms';
 import { ZIndexProvider } from '@/utils/ZIndexContext';
+import { v4 as uuidv4 } from 'uuid';
 
 const FILTER_NAV_HEIGHT = 22;
+const TOOLBAR_HEIGHT = 40;
+const SPAWN_OFFSET_Y = 100;
 
 type LayoutType = 'grid' | 'masonry' | 'compact';
 
@@ -121,9 +124,10 @@ export default function Home() {
           position: { x, y },
           description: description ?? ''
         })),
-        textBlocks: textBlocks.map(({ id, current_position: { x, y } }) => ({
+        textBlocks: textBlocks.map(({ id, current_position: { x, y }, content }) => ({
           id,
-          position: { x, y }
+          position: { x, y },
+          content: content
         }))
       });
       setHasUnsavedChanges(false);
@@ -202,6 +206,58 @@ export default function Home() {
 
     setHasUnsavedChanges(true);
   }, [images, videos, textBlocks]);
+
+  const handleAddTextBlock = async () => {
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    const spawnX = scrollX + (viewportWidth / 2) - 150;
+    const spawnY = scrollY + viewportHeight - TOOLBAR_HEIGHT - SPAWN_OFFSET_Y;
+
+    const newText: TextBlock = {
+      id: uuidv4(),
+      content: 'New text block',
+      current_position: { 
+        x: Math.round(spawnX / 16) * 16,
+        y: Math.round(spawnY / 16) * 16
+      },
+      default_position: {
+        x: Math.round(spawnX / 16) * 16,
+        y: Math.round(spawnY / 16) * 16
+      },
+      width: 300
+    };
+    
+    try {
+      await contentService.createTextBlock(newText);
+      setTextBlocks(prev => [...prev, newText]);
+      setHasUnsavedChanges(true);
+    } catch (error) {
+      console.error('Failed to create text block:', error);
+      alert('Failed to create text block');
+    }
+  };
+
+  const handleTextChange = (id: string, newContent: string) => {
+    setTextBlocks(prev => prev.map(text =>
+      text.id === id ? { ...text, content: newContent } : text
+    ));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleDeleteText = async (id: string) => {
+    try {
+      await contentService.deleteTextBlock(id);
+      setTextBlocks(prev => prev.filter(text => text.id !== id));
+      setHasUnsavedChanges(true);
+    } catch (error) {
+      console.error('Failed to delete text block:', error);
+      alert('Failed to delete text block');
+    }
+  };
 
   return (
     <ZIndexProvider>
@@ -288,6 +344,8 @@ export default function Home() {
             text={text.content}
             position={text.current_position}
             onPositionChange={(pos) => handlePositionChange(text.id, pos, 'text')}
+            onTextChange={(newText) => handleTextChange(text.id, newText)}
+            onDelete={() => handleDeleteText(text.id)}
           />
         ))}
 
@@ -326,6 +384,26 @@ export default function Home() {
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
           >
             Clean Up Layout
+          </button>
+          <button 
+            onClick={handleAddTextBlock}
+            style={{
+              padding: '4px 8px',
+              backgroundColor: '#f0f0f0',
+              color: '#333',
+              border: 'none',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              marginRight: '10px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              transition: 'background-color 0.3s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+          >
+            Add Text
           </button>
           <DisplayFilters
             showImages={showImages}
