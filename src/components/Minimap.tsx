@@ -69,17 +69,6 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
   const scaleY = containerHeight / contentHeight;
   const scale = Math.min(scaleX, scaleY);
 
-  console.log({
-    bounds,
-    contentWidth,
-    contentHeight,
-    containerWidth,
-    containerHeight,
-    scale,
-    windowInnerWidth: typeof window !== 'undefined' ? window.innerWidth : 0,
-    windowInnerHeight: typeof window !== 'undefined' ? window.innerHeight : 0
-  });
-
   const minimapStyle: CSSProperties = {
     position: 'fixed',
     right: '20px',

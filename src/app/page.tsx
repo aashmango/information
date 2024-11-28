@@ -16,8 +16,6 @@ const FILTER_NAV_HEIGHT = 22;
 const TOOLBAR_HEIGHT = 40;
 const SPAWN_OFFSET_Y = 100;
 
-type LayoutType = 'grid' | 'masonry' | 'compact';
-
 export default function Home() {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [textBlocks, setTextBlocks] = useState<TextBlock[]>([]);
@@ -273,7 +271,7 @@ export default function Home() {
             transparent 1px)
           `,
           backgroundSize: '16px 16px',
-          backgroundPosition: `8px ${FILTER_NAV_HEIGHT + 8}px`,
+          backgroundPosition: `8px 8px`,
           backgroundRepeat: 'repeat',
           overflow: 'auto',
         }}

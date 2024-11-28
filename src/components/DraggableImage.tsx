@@ -100,11 +100,11 @@ export default function DraggableImage({
             transition: 'box-shadow 0.2s ease-in-out',
             borderRadius: '2px',
             padding: '8px',
-            border: `1px solid ${isHovered ? '#A0A0A0' : isDragging ? '#E5E5E5' : '#F0F0F0'}`,
+            border: '1px solid #F0F0F0',
             backgroundColor: 'white',
             boxShadow: isHovered 
-              ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-              : 'none',
+              ? 'shadow-lg'
+              : 'shadow-none',
           }}
           className="flex flex-col gap-2"
         >
