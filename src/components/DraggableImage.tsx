@@ -85,7 +85,6 @@ export default function DraggableImage({
           position: 'absolute',
           cursor: isDragging ? 'grabbing' : 'grab',
           zIndex, // Use the managed zIndex instead of isActive
-          backgroundColor: 'white',
           transform: `translate(${position.x}px, ${position.y}px)`, // Explicit transform
           transition: 'none', // Prevent transition during drag
         }}
@@ -98,15 +97,15 @@ export default function DraggableImage({
         <div
           style={{
             transition: 'box-shadow 0.2s ease-in-out',
-            borderRadius: '2px',
-            padding: '8px',
-            border: '1px solid #F0F0F0',
+            borderRadius: '10px',
+            border: '1px solid #e5e7eb',
             backgroundColor: 'white',
             boxShadow: isHovered 
-              ? 'shadow-lg'
-              : 'shadow-none',
+              ? '0 0px 50px rgba(0, 0, 0, 0.15)'
+              : 'none',
+            overflow: 'hidden',
           }}
-          className="flex flex-col gap-2"
+          className="flex flex-col"
         >
           <Image
             src={currentSrc}
@@ -123,66 +122,33 @@ export default function DraggableImage({
             draggable={false}
             priority={image.isExpanded}
           />
-          <div className="w-full flex flex-col gap-1">
-            <div className="flex gap-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleSize?.();
-                }}
-                className="!text-xs transition-colors"
-                style={{
-                  fontSize: '0.75rem',
-                  border: 'none',
-                  borderBottom: !image.isExpanded ? '1px solid currentColor' : 'none',
-                  padding: 0,
-                  margin: 0,
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: !image.isExpanded ? '#000' : '#A0A0A0',
-                }}
-                onMouseEnter={(e) => {
-                  if (image.isExpanded) {
-                    e.currentTarget.style.borderBottom = '1px solid #E5E5E5';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (image.isExpanded) {
-                    e.currentTarget.style.borderBottom = 'none';
-                  }
-                }}
-              >
-                Small
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleSize?.();
-                }}
-                className="!text-xs transition-colors"
-                style={{
-                  fontSize: '0.75rem',
-                  border: 'none',
-                  borderBottom: image.isExpanded ? '1px solid currentColor' : 'none',
-                  padding: 0,
-                  margin: 0,
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: image.isExpanded ? '#000' : '#A0A0A0',
-                }}
-                onMouseEnter={(e) => {
-                  if (!image.isExpanded) {
-                    e.currentTarget.style.borderBottom = '1px solid #E5E5E5';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!image.isExpanded) {
-                    e.currentTarget.style.borderBottom = 'none';
-                  }
-                }}
-              >
-                Big
-              </button>
+          <div className="w-full flex flex-col">
+            <div className="flex justify-end">
+              {isHovered && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleSize?.();
+                  }}
+                  className="!text-xs transition-colors"
+                  style={{
+                    fontSize: '8px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '20px',
+                    padding: '3px 8px',
+                    margin: 0,
+                    background: '#fff',
+                    cursor: 'pointer',
+                    color: '#000',
+                    position: 'absolute',
+                    top: '-6px',
+                    right: '-6px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  {image.isExpanded ? 'Small' : 'Big'}
+                </button>
+              )}
             </div>
             {!isEditing ? (
               <div 
@@ -196,7 +162,8 @@ export default function DraggableImage({
                   whiteSpace: 'pre-wrap',
                   overflowWrap: 'break-word',
                   minHeight: '1.5em',
-                  color: '#A0A0A0'
+                  color: '#A0A0A0',
+                  padding: '8px'
                 }}
                 onClick={() => setIsEditing(true)}
               >

@@ -267,7 +267,7 @@ export default function Home() {
           position: 'relative',
           backgroundColor: 'white',
           backgroundImage: `
-            radial-gradient(#CCCCCC 1px, 
+            radial-gradient(#d1d5db 1px, 
             transparent 1px)
           `,
           backgroundSize: '16px 16px',

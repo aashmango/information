@@ -68,8 +68,8 @@ export function getItemDimensions(item: ImageItem | VideoItem | TextBlock): Item
 }
 
 export function gridLayout(items: ItemWithDimensions[]): Position[] {
-  const COLUMN_GAP = 60;
-  const ROW_GAP = 40;
+  const COLUMN_GAP = 20;
+  const ROW_GAP = 10;
   const COLUMN_WIDTH = 300;
   const containerWidth = window.innerWidth;
   
@@ -94,6 +94,7 @@ export function gridLayout(items: ItemWithDimensions[]): Position[] {
     positions.push({ x, y });
     
     // Update column height
+    // Ensure the height includes the item's height and the row gap
     columns[shortestColumnIndex] = y + item.height + ROW_GAP;
   });
 

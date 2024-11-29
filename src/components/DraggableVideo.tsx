@@ -117,45 +117,31 @@ export default function DraggableVideo({
             }}
           />
           <div className="w-full flex flex-col gap-1">
-            <div className="flex gap-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (video.isExpanded) onToggleSize?.();
-                }}
-                className="!text-xs transition-colors"
-                style={{
-                  fontSize: '0.75rem',
-                  border: 'none',
-                  borderBottom: !video.isExpanded ? '1px solid currentColor' : 'none',
-                  padding: 0,
-                  margin: 0,
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: !video.isExpanded ? '#000' : '#A0A0A0',
-                }}
-              >
-                Small
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!video.isExpanded) onToggleSize?.();
-                }}
-                className="!text-xs transition-colors"
-                style={{
-                  fontSize: '0.75rem',
-                  border: 'none',
-                  borderBottom: video.isExpanded ? '1px solid currentColor' : 'none',
-                  padding: 0,
-                  margin: 0,
-                  background: 'none',
-                  cursor: 'pointer',
-                  color: video.isExpanded ? '#000' : '#A0A0A0',
-                }}
-              >
-                Big
-              </button>
+            <div className="flex justify-end">
+              {isHovered && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleSize?.();
+                  }}
+                  className="!text-xs transition-colors"
+                  style={{
+                    fontSize: '10px',
+                    border: '1px solid #E0E0E0',
+                    padding: '2px 4px',
+                    margin: 0,
+                    background: 'white',
+                    cursor: 'pointer',
+                    color: '#000',
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  {video.isExpanded ? 'Small' : 'Big'}
+                </button>
+              )}
             </div>
             {!isEditing ? (
               <div 
