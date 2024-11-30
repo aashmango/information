@@ -60,20 +60,22 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
+    if (typeof window !== 'undefined') {
+      const handleScroll = () => {
+        const container = document.querySelector('main')?.parentElement;
+        if (container) {
+          setScrollPosition({
+            x: container.scrollLeft,
+            y: container.scrollTop
+          });
+        }
+      };
+
       const container = document.querySelector('main')?.parentElement;
       if (container) {
-        setScrollPosition({
-          x: container.scrollLeft,
-          y: container.scrollTop
-        });
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
       }
-    };
-
-    const container = document.querySelector('main')?.parentElement;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
     }
   }, []);
 
@@ -236,36 +238,38 @@ export default function Home() {
   }, [images, videos, textBlocks]);
 
   const handleAddTextBlock = async () => {
-    const scrollX = window.scrollX;
-    const scrollY = window.scrollY;
-    
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    if (typeof window !== 'undefined') {
+      const scrollX = window.scrollX;
+      const scrollY = window.scrollY;
+      
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
 
-    const spawnX = scrollX + (viewportWidth / 2) - 150;
-    const spawnY = scrollY + viewportHeight - TOOLBAR_HEIGHT - SPAWN_OFFSET_Y;
+      const spawnX = scrollX + (viewportWidth / 2) - 150;
+      const spawnY = scrollY + viewportHeight - TOOLBAR_HEIGHT - SPAWN_OFFSET_Y;
 
-    const newText: TextBlock = {
-      id: uuidv4(),
-      content: 'New text block',
-      current_position: { 
-        x: Math.round(spawnX / 16) * 16,
-        y: Math.round(spawnY / 16) * 16
-      },
-      default_position: {
-        x: Math.round(spawnX / 16) * 16,
-        y: Math.round(spawnY / 16) * 16
-      },
-      width: 300
-    };
-    
-    try {
-      await contentService.createTextBlock(newText);
-      setTextBlocks(prev => [...prev, newText]);
-      setHasUnsavedChanges(true);
-    } catch (error) {
-      console.error('Failed to create text block:', error);
-      alert('Failed to create text block');
+      const newText: TextBlock = {
+        id: uuidv4(),
+        content: 'New text block',
+        current_position: { 
+          x: Math.round(spawnX / 16) * 16,
+          y: Math.round(spawnY / 16) * 16
+        },
+        default_position: {
+          x: Math.round(spawnX / 16) * 16,
+          y: Math.round(spawnY / 16) * 16
+        },
+        width: 300
+      };
+      
+      try {
+        await contentService.createTextBlock(newText);
+        setTextBlocks(prev => [...prev, newText]);
+        setHasUnsavedChanges(true);
+      } catch (error) {
+        console.error('Failed to create text block:', error);
+        alert('Failed to create text block');
+      }
     }
   };
 
