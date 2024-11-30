@@ -101,7 +101,7 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
               width: `${width}px`,
               height: `${height}px`,
               backgroundColor: '#d4d4d8',
-              border: '1px solid #b0b0b0', // Border added
+              border: '1px solid #b0b0b0',
               opacity: 1,
             }}
           />
@@ -122,7 +122,7 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
               width: `${width}px`,
               height: `${height}px`,
               backgroundColor: '#d4d4d8',
-              border: '1px solid #b0b0b0', // Border added
+              border: '1px solid #b0b0b0',
               opacity: 1,
             }}
           />
@@ -143,7 +143,7 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
               width: `${width}px`,
               height: `${height}px`,
               backgroundColor: '#d4d4d8',
-              border: '1px solid #b0b0b0', // Border added
+              border: '1px solid #b0b0b0',
               opacity: 1,
             }}
           />
@@ -155,8 +155,8 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
           position: 'absolute',
           left: `${(scrollPosition.x / zoomLevel) * scale}px`,
           top: `${(scrollPosition.y / zoomLevel) * scale}px`,
-          width: `${(window.innerWidth / zoomLevel) * scale}px`,
-          height: `${(window.innerHeight / zoomLevel) * scale}px`,
+          width: `${(typeof window !== 'undefined' ? window.innerWidth : 0 / zoomLevel) * scale}px`,
+          height: `${(typeof window !== 'undefined' ? window.innerHeight : 0 / zoomLevel) * scale}px`,
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           border: '1px solid rgba(0, 0, 0, 0.3)',
           pointerEvents: 'none',

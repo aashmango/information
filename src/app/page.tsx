@@ -326,16 +326,16 @@ export default function Home() {
 
   // Then use these bounds to calculate appropriate minimap dimensions
   const bounds = getBounds();
-  const contentWidth = bounds.maxX - bounds.minX;
-  const contentHeight = bounds.maxY - bounds.minY;
+  const contentWidth = Math.max(bounds.maxX - bounds.minX, typeof window !== 'undefined' ? window.innerWidth : 0);
+  const contentHeight = Math.max(bounds.maxY - bounds.minY, typeof window !== 'undefined' ? window.innerHeight : 0);
   const aspectRatio = contentWidth / contentHeight;
 
   // Use a maximum width of 150px for the minimap
-  const minimapWidth = window.innerWidth * 0.1;
+  const minimapWidth = typeof window !== 'undefined' ? window.innerWidth * 0.1 : 500; // Default value for SSR
   const minimapHeight = minimapWidth / aspectRatio;
 
   console.log('Minimap Width:', minimapWidth);
-  console.log('WindowWidth:',window.innerWidth);
+  console.log('WindowWidth:', typeof window !== 'undefined' ? window.innerWidth : 0);
   console.log('Aspect Ratio:', aspectRatio);
   console.log('Minimap Height:', minimapHeight);
 
@@ -386,7 +386,7 @@ export default function Home() {
             }))}
             showImages={showImages}
             showText={showText}
-            showVideos={showImages}
+            showVideos={showVideos}
             scrollPosition={scrollPosition}
             containerWidth={minimapWidth}
             containerHeight={minimapHeight}
@@ -428,7 +428,7 @@ export default function Home() {
               />
             ))}
 
-            {showImages && videos.map(video => (
+            {showVideos && videos.map(video => (
               <DraggableVideo
                 key={video.id}
                 id={video.id}
