@@ -293,6 +293,11 @@ export default function Home() {
 
   // First, calculate the bounds of all items
   const getBounds = () => {
+    if (typeof window === 'undefined') {
+      // Provide default values or handle the case when window is not available
+      return { maxX: 0, maxY: 0, minX: 0, minY: 0 };
+    }
+
     const allItems = [
       ...(showImages ? images : []),
       ...(showText ? textBlocks : []),
@@ -397,10 +402,6 @@ export default function Home() {
               height: `${CANVAS_HEIGHT / zoomLevel}px`,
               position: 'relative',
               backgroundColor: 'white',
-              backgroundImage: `
-                radial-gradient(#d1d5db 1px, 
-                transparent 1px)
-              `,
               backgroundSize: `${16}px ${16}px`,
               backgroundPosition: `${8}px ${8}px`,
               backgroundRepeat: 'repeat',
