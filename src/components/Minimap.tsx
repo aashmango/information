@@ -74,13 +74,15 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
     position: 'fixed',
     right: '20px',
     top: '20px',
+    borderRadius: '2px',
     width: `${containerWidth}px`,
     height: `${containerHeight}px`,
-    border: '1px solid #ccc',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    border: '1px solid #e5e7eb',
+    backgroundColor: 'rgba(244, 244, 245, 0.8)',
     overflow: 'hidden',
     zIndex: 1000,
     pointerEvents: 'all',
+    backdropFilter: 'blur(10px)',
   };
 
   return (
@@ -98,8 +100,9 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
               top: `${image.current_position.y * scale}px`,
               width: `${width}px`,
               height: `${height}px`,
-              backgroundColor: '#007AFF',
-              opacity: 0.5,
+              backgroundColor: '#d4d4d8',
+              border: '1px solid #b0b0b0', // Border added
+              opacity: 1,
             }}
           />
         );
@@ -118,8 +121,9 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
               top: `${video.current_position.y * scale}px`,
               width: `${width}px`,
               height: `${height}px`,
-              backgroundColor: '#FF3B30',
-              opacity: 0.5,
+              backgroundColor: '#d4d4d8',
+              border: '1px solid #b0b0b0', // Border added
+              opacity: 1,
             }}
           />
         );
@@ -138,8 +142,9 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
               top: `${text.current_position.y * scale}px`,
               width: `${width}px`,
               height: `${height}px`,
-              backgroundColor: '#FF9500',
-              opacity: 0.5,
+              backgroundColor: '#d4d4d8',
+              border: '1px solid #b0b0b0', // Border added
+              opacity: 1,
             }}
           />
         );

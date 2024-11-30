@@ -331,8 +331,13 @@ export default function Home() {
   const aspectRatio = contentWidth / contentHeight;
 
   // Use a maximum width of 150px for the minimap
-  const minimapWidth = Math.min(150, window.innerWidth * 0.1);
+  const minimapWidth = window.innerWidth * 0.1;
   const minimapHeight = minimapWidth / aspectRatio;
+
+  console.log('Minimap Width:', minimapWidth);
+  console.log('WindowWidth:',window.innerWidth);
+  console.log('Aspect Ratio:', aspectRatio);
+  console.log('Minimap Height:', minimapHeight);
 
   return (
     <ZIndexProvider>
