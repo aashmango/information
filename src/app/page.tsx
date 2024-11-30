@@ -4,7 +4,6 @@ import { ImageItem, TextBlock, Position, VideoItem } from '@/types';
 import { contentService } from '@/services/content';
 import DraggableImage from '@/components/DraggableImage';
 import DraggableText from '@/components/DraggableText';
-import DisplayFilters from '@/components/DisplayFilters';
 import Minimap from '@/components/Minimap';
 import DraggableVideo from '@/components/DraggableVideo';
 import { getItemDimensions, gridLayout, calculateDescriptionHeight, DEFAULT_TEXT_HEIGHT, PADDING } from '@/utils/layoutAlgorithms';
@@ -12,9 +11,12 @@ import { ZIndexProvider } from '@/utils/ZIndexContext';
 import { v4 as uuidv4 } from 'uuid';
 import Toolbar from '@/components/Toolbar';
 
-const FILTER_NAV_HEIGHT = 22;
 const TOOLBAR_HEIGHT = 40;
 const SPAWN_OFFSET_Y = 100;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2;
+const ZOOM_STEP = 0.1;
+const CANVAS_HEIGHT = 5000;
 
 export default function Home() {
   const [images, setImages] = useState<ImageItem[]>([]);
@@ -24,6 +26,8 @@ export default function Home() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [scrollPosition, setScrollPosition] = useState({ x: 0, y: 0 });
   const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [showVideos, setShowVideos] = useState(true);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -57,14 +61,20 @@ export default function Home() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrollPosition({
-        x: window.scrollX,
-        y: window.scrollY
-      });
+      const container = document.querySelector('main')?.parentElement;
+      if (container) {
+        setScrollPosition({
+          x: container.scrollLeft,
+          y: container.scrollTop
+        });
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const container = document.querySelector('main')?.parentElement;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
   }, []);
 
   const handlePositionChange = useCallback((
@@ -113,20 +123,22 @@ export default function Home() {
   const handleSaveChanges = useCallback(async () => {
     try {
       await contentService.savePositions({
-        images: images.map(({ id, current_position: { x, y }, description }) => ({
-          id,
-          position: { x, y },
-          description: description ?? ''
+        images: images.map(img => ({
+          id: img.id,
+          position: img.current_position,
+          description: img.description || '',
+          isExpanded: img.isExpanded || false
         })),
-        videos: videos.map(({ id, current_position: { x, y }, description }) => ({
-          id,
-          position: { x, y },
-          description: description ?? ''
+        videos: videos.map(video => ({
+          id: video.id,
+          position: video.current_position,
+          description: video.description || '',
+          isExpanded: video.isExpanded || false
         })),
-        textBlocks: textBlocks.map(({ id, current_position: { x, y }, content }) => ({
-          id,
-          position: { x, y },
-          content: content
+        textBlocks: textBlocks.map(text => ({
+          id: text.id,
+          position: text.current_position,
+          content: text.content
         }))
       });
       setHasUnsavedChanges(false);
@@ -137,17 +149,34 @@ export default function Home() {
     }
   }, [images, videos, textBlocks]);
 
+  const handleZoom = useCallback((direction: 'in' | 'out') => {
+    setZoomLevel(prevZoom => {
+      const newZoom = direction === 'in' 
+        ? prevZoom + ZOOM_STEP 
+        : prevZoom - ZOOM_STEP;
+      return Math.min(Math.max(newZoom, MIN_ZOOM), MAX_ZOOM);
+    });
+  }, []);
+
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === 's') {
         event.preventDefault();
         if (hasUnsavedChanges) handleSaveChanges();
       }
+      if (event.ctrlKey && event.key === '=') {
+        event.preventDefault();
+        handleZoom('in');
+      }
+      if (event.ctrlKey && event.key === '-') {
+        event.preventDefault();
+        handleZoom('out');
+      }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [hasUnsavedChanges, handleSaveChanges]);
+  }, [hasUnsavedChanges, handleSaveChanges, handleZoom]);
 
   const handleToggleSize = useCallback((id: string, type: 'image' | 'video') => {
     if (type === 'image') {
@@ -258,95 +287,164 @@ export default function Home() {
     }
   };
 
+  // First, calculate the bounds of all items
+  const getBounds = () => {
+    const allItems = [
+      ...(showImages ? images : []),
+      ...(showText ? textBlocks : []),
+      ...(showVideos ? videos : [])
+    ];
+
+    if (allItems.length === 0) {
+      return {
+        maxX: window.innerWidth,
+        maxY: window.innerHeight,
+        minX: 0,
+        minY: 0
+      };
+    }
+
+    return allItems.reduce((bounds, item) => {
+      const itemHeight = 'height' in item ? item.height : DEFAULT_TEXT_HEIGHT;
+      return {
+        maxX: Math.max(bounds.maxX, item.current_position.x + (item.width || 300)),
+        maxY: Math.max(bounds.maxY, item.current_position.y + itemHeight),
+        minX: Math.min(bounds.minX, item.current_position.x),
+        minY: Math.min(bounds.minY, item.current_position.y),
+      };
+    }, { maxX: 0, maxY: 0, minX: Infinity, minY: Infinity });
+  };
+
+  // Then use these bounds to calculate appropriate minimap dimensions
+  const bounds = getBounds();
+  const contentWidth = bounds.maxX - bounds.minX;
+  const contentHeight = bounds.maxY - bounds.minY;
+  const aspectRatio = contentWidth / contentHeight;
+
+  // Use a maximum width of 150px for the minimap
+  const minimapWidth = Math.min(150, window.innerWidth * 0.1);
+  const minimapHeight = minimapWidth / aspectRatio;
+
   return (
     <ZIndexProvider>
-      <main 
-        style={{
-          width: '100%',
-          height: '5000px',
-          position: 'relative',
-          backgroundColor: 'white',
-          backgroundImage: `
-            radial-gradient(#d1d5db 1px, 
-            transparent 1px)
-          `,
-          backgroundSize: '16px 16px',
-          backgroundPosition: `8px 8px`,
-          backgroundRepeat: 'repeat',
-          overflow: 'auto',
+      <div 
+        style={{ 
+          position: 'relative', 
+          width: '100%', 
+          height: '100vh',
+          overflow: 'hidden'
         }}
       >
-        <Minimap
-          images={images.map(img => {
-            const baseWidth = img.isExpanded ? 600 : 300;
-            const mediaHeight = img.isExpanded ? 
-              Math.round(600 * (img.height / img.width)) : 
-              Math.round(300 * (img.height / img.width));
-            const descriptionHeight = calculateDescriptionHeight(img.description);
-            const totalHeight = mediaHeight + descriptionHeight + PADDING;
-            
-            return {
-              ...img,
-              width: baseWidth,
-              aspectRatio: baseWidth / totalHeight
-            };
-          })}
-          videos={videos.map(video => ({
-            ...video,
-            width: video.isExpanded ? 600 : 300,
-            aspectRatio: (video.isExpanded ? 600 : 300) / 
-              (Math.round((video.isExpanded ? 600 : 300) * (video.height / video.width)) + 
-               calculateDescriptionHeight(video.description) + 
-               PADDING)
-          }))}
-          textBlocks={textBlocks.map(text => ({
-            ...text,
-            width: text.width,
-            aspectRatio: text.width / DEFAULT_TEXT_HEIGHT
-          }))}
-          showImages={showImages}
-          showText={showText}
-          showVideos={showImages}
-          scrollPosition={scrollPosition}
-          containerWidth={100}
-          containerHeight={200}
-        />
-        
-        {showImages && images.map(image => (
-          <DraggableImage
-            key={image.id}
-            id={image.id}
-            position={image.current_position}
-            image={image}
-            onPositionChange={(pos) => handlePositionChange(image.id, pos, 'image')}
-            onToggleSize={() => handleToggleSize(image.id, 'image')}
-            onDescriptionChange={(desc) => handleDescriptionChange(image.id, desc)}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          zIndex: 1000,
+          pointerEvents: 'none', // Allow clicking through to elements underneath
+        }}>
+          <Minimap
+            images={images.map(img => {
+              const baseWidth = img.isExpanded ? 600 : 300;
+              const mediaHeight = img.isExpanded ? 
+                Math.round(600 * (img.height / img.width)) : 
+                Math.round(300 * (img.height / img.width));
+              const descriptionHeight = calculateDescriptionHeight(img.description);
+              const totalHeight = mediaHeight + descriptionHeight + PADDING;
+              
+              return {
+                ...img,
+                width: baseWidth,
+                aspectRatio: baseWidth / totalHeight
+              };
+            })}
+            videos={videos.map(video => ({
+              ...video,
+              width: video.isExpanded ? 600 : 300,
+              aspectRatio: (video.isExpanded ? 600 : 300) / 
+                (Math.round((video.isExpanded ? 600 : 300) * (video.height / video.width)) + 
+                 calculateDescriptionHeight(video.description) + 
+                 PADDING)
+            }))}
+            textBlocks={textBlocks.map(text => ({
+              ...text,
+              width: text.width,
+              aspectRatio: text.width / DEFAULT_TEXT_HEIGHT
+            }))}
+            showImages={showImages}
+            showText={showText}
+            showVideos={showImages}
+            scrollPosition={scrollPosition}
+            containerWidth={minimapWidth}
+            containerHeight={minimapHeight}
+            zoomLevel={zoomLevel}
           />
-        ))}
+        </div>
 
-        {showImages && videos.map(video => (
-          <DraggableVideo
-            key={video.id}
-            id={video.id}
-            position={video.current_position}
-            video={video}
-            onPositionChange={(pos) => handlePositionChange(video.id, pos, 'video')}
-            onToggleSize={() => handleToggleSize(video.id, 'video')}
-            onDescriptionChange={(desc) => handleDescriptionChange(video.id, desc)}
-          />
-        ))}
+        <div 
+          style={{
+            width: '100%',
+            height: '100%',
+            overflow: 'auto',
+          }}
+        >
+          <main 
+            style={{
+              width: `${100 / zoomLevel}%`,
+              height: `${CANVAS_HEIGHT / zoomLevel}px`,
+              position: 'relative',
+              backgroundColor: 'white',
+              backgroundImage: `
+                radial-gradient(#d1d5db 1px, 
+                transparent 1px)
+              `,
+              backgroundSize: `${16}px ${16}px`,
+              backgroundPosition: `${8}px ${8}px`,
+              backgroundRepeat: 'repeat',
+              transform: `scale(${zoomLevel})`,
+              transformOrigin: '0 0',
+              minHeight: '100vh',
+            }}
+          >
+            {showImages && images.map(image => (
+              <DraggableImage
+                key={image.id}
+                id={image.id}
+                position={image.current_position}
+                image={image}
+                onPositionChange={(pos) => handlePositionChange(image.id, pos, 'image')}
+                onToggleSize={() => handleToggleSize(image.id, 'image')}
+                onDescriptionChange={(desc) => handleDescriptionChange(image.id, desc)}
+                zoomLevel={zoomLevel}
+              />
+            ))}
 
-        {showText && textBlocks.map(text => (
-          <DraggableText
-            key={text.id}
-            id={text.id}
-            text={text.content}
-            position={text.current_position}
-            onPositionChange={(pos) => handlePositionChange(text.id, pos, 'text')}
-            onTextChange={(newText) => handleTextChange(text.id, newText)}
-            onDelete={() => handleDeleteText(text.id)}
-          />
-        ))}
+            {showImages && videos.map(video => (
+              <DraggableVideo
+                key={video.id}
+                id={video.id}
+                position={video.current_position}
+                video={video}
+                onPositionChange={(pos) => handlePositionChange(video.id, pos, 'video')}
+                onToggleSize={() => handleToggleSize(video.id, 'video')}
+                onDescriptionChange={(desc) => handleDescriptionChange(video.id, desc)}
+                zoomLevel={zoomLevel}
+              />
+            ))}
+
+            {showText && textBlocks.map(text => (
+              <DraggableText
+                key={text.id}
+                id={text.id}
+                text={text.content}
+                position={text.current_position}
+                onPositionChange={(pos) => handlePositionChange(text.id, pos, 'text')}
+                onTextChange={(newText) => handleTextChange(text.id, newText)}
+                onDelete={() => handleDeleteText(text.id)}
+                zoomLevel={zoomLevel}
+              />
+            ))}
+          </main>
+        </div>
 
         <Toolbar
           onCleanupLayout={handleCleanupLayout}
@@ -355,8 +453,11 @@ export default function Home() {
           showText={showText}
           onToggleImages={setShowImages}
           onToggleText={setShowText}
+          onZoomIn={() => handleZoom('in')}
+          onZoomOut={() => handleZoom('out')}
+          zoomLevel={zoomLevel}
         />
-      </main>
+      </div>
     </ZIndexProvider>
   );
 }

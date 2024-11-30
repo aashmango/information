@@ -2,9 +2,9 @@ import { supabase } from '@/lib/supabase'
 import { ImageItem, TextBlock, DatabaseImage, DatabaseText, Position, VideoItem, DatabaseVideo } from '@/types'
 
 interface SavePositionsPayload {
-  images: Array<{ id: string; position: Position; description: string }>;
+  images: Array<{ id: string; position: Position; description: string; isExpanded: boolean }>;
   textBlocks: Array<{ id: string; position: Position; content: string }>;
-  videos: Array<{ id: string; position: Position; description: string }>;
+  videos: Array<{ id: string; position: Position; description: string; isExpanded: boolean }>;
 }
 
 export const contentService = {
@@ -38,7 +38,7 @@ export const contentService = {
       },
       width: img.width,
       height: img.height,
-      isExpanded: false,
+      isExpanded: img.is_expanded || false,
       description: img.description,
       thumbnail_url: img.thumbnail_url,
       original_url: img.original_url
@@ -93,7 +93,7 @@ export const contentService = {
         y: video.default_position_y
       },
       description: video.description,
-      isExpanded: false,
+      isExpanded: video.is_expanded || false,
       autoplay: true,
       loop: true,
       muted: true
@@ -118,10 +118,14 @@ export const contentService = {
   async savePositions({ images, textBlocks, videos }: SavePositionsPayload): Promise<void> {
     try {
       // Save image positions
-      for (const { id, position, description } of images) {
+      for (const { id, position, description, isExpanded } of images) {
         const { error } = await supabase
           .from('images')
-          .update({ current_position: position, description })
+          .update({ 
+            current_position: position, 
+            description,
+            is_expanded: isExpanded
+          })
           .eq('id', id);
 
         if (error) {
@@ -145,10 +149,14 @@ export const contentService = {
       }
 
       // Save video positions
-      for (const { id, position, description } of videos) {
+      for (const { id, position, description, isExpanded } of videos) {
         const { error } = await supabase
           .from('videos')
-          .update({ current_position: position, description })
+          .update({ 
+            current_position: position, 
+            description,
+            is_expanded: isExpanded
+          })
           .eq('id', id);
 
         if (error) {

@@ -18,3 +18,15 @@ body {
   cursor: -webkit-grabbing;
   cursor: grabbing;
 }
+
+.w-md-editor {
+  --md-editor-font-family: var(--font-geist-sans);
+}
+
+.w-md-editor-text {
+  font-family: var(--font-geist-sans);
+}
+
+.w-md-editor-preview {
+  font-family: var(--font-geist-sans);
+}

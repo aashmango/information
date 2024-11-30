@@ -11,9 +11,10 @@ interface MinimapProps {
   scrollPosition: { x: number; y: number };
   containerWidth: number;
   containerHeight: number;
+  zoomLevel: number;
 }
 
-export default function Minimap({ images, textBlocks, videos, showImages, showText, showVideos, scrollPosition, containerWidth, containerHeight }: MinimapProps) {
+export default function Minimap({ images, textBlocks, videos, showImages, showText, showVideos, scrollPosition, containerWidth, containerHeight, zoomLevel }: MinimapProps) {
   const [viewportWidth, setViewportWidth] = useState(5000);
 
   useEffect(() => {
@@ -73,12 +74,13 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
     position: 'fixed',
     right: '20px',
     top: '20px',
-    width: `${containerWidth * 0.65}px`,
+    width: `${containerWidth}px`,
     height: `${containerHeight}px`,
     border: '1px solid #ccc',
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     overflow: 'hidden',
     zIndex: 1000,
+    pointerEvents: 'all',
   };
 
   return (
@@ -146,10 +148,10 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
       <div
         style={{
           position: 'absolute',
-          left: `${scrollPosition.x * scale}px`,
-          top: `${scrollPosition.y * scale}px`,
-          width: `${typeof window !== 'undefined' ? window.innerWidth * scale : 0}px`,
-          height: `${typeof window !== 'undefined' ? window.innerHeight * scale : 0}px`,
+          left: `${(scrollPosition.x / zoomLevel) * scale}px`,
+          top: `${(scrollPosition.y / zoomLevel) * scale}px`,
+          width: `${(window.innerWidth / zoomLevel) * scale}px`,
+          height: `${(window.innerHeight / zoomLevel) * scale}px`,
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
           border: '1px solid rgba(0, 0, 0, 0.3)',
           pointerEvents: 'none',

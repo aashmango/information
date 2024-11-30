@@ -9,6 +9,7 @@ interface Props extends DraggableProps {
   className?: string;
   onToggleSize?: () => void;
   onDescriptionChange?: (newDescription: string) => void;
+  zoomLevel: number;
 }
 
 export default function DraggableImage({ 
@@ -18,7 +19,8 @@ export default function DraggableImage({
   id, 
   className,
   onToggleSize,
-  onDescriptionChange = () => {}
+  onDescriptionChange = () => {},
+  zoomLevel
 }: Props) {
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -67,7 +69,7 @@ export default function DraggableImage({
       position={position}
       grid={[16, 16]}
       offsetParent={document.body}
-      scale={1}
+      scale={zoomLevel}
       onStart={() => {
         setIsDragging(true);
         bringToFront(); // Bring to front when starting drag
@@ -150,51 +152,53 @@ export default function DraggableImage({
                 </button>
               )}
             </div>
-            {!isEditing ? (
-              <div 
-                className="!text-xs text-gray-700"
-                style={{ 
-                  fontSize: '0.75rem', 
-                  cursor: 'pointer', 
-                  maxWidth: `${currentDimensions.width}px`, 
-                  lineHeight: '1.5', 
-                  textAlign: 'left',
-                  whiteSpace: 'pre-wrap',
-                  overflowWrap: 'break-word',
-                  minHeight: '1.5em',
-                  color: '#A0A0A0',
-                  padding: '8px'
-                }}
-                onClick={() => setIsEditing(true)}
-              >
-                {image.description}
-              </div>
-            ) : (
-              <textarea
-                value={image.description}
-                onChange={(e) => onDescriptionChange(e.target.value)}
-                placeholder="Edit description"
-                style={{ 
-                  width: `${currentDimensions.width}px`, 
-                  marginTop: '8px',
-                  lineHeight: '1.5', // Match line height
-                  minHeight: '1.5em', // Ensure consistent height
-                  resize: 'none', // Disable manual resizing
-                  overflow: 'hidden', // Hide overflow to prevent scrollbars
-                  fontSize: '0.75rem' // Explicitly set font size to match the div
-                }}
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setIsEditing(false);
-                  }
-                }}
-                onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement;
-                  target.style.height = 'auto'; // Reset height
-                  target.style.height = `${target.scrollHeight}px`; // Set to scroll height
-                }}
-              />
+            {(isEditing || image.description) && (
+              !isEditing ? (
+                <div 
+                  className="!text-xs text-gray-700"
+                  style={{ 
+                    fontSize: '0.75rem', 
+                    cursor: 'pointer', 
+                    maxWidth: `${currentDimensions.width}px`, 
+                    lineHeight: '1.5', 
+                    textAlign: 'left',
+                    whiteSpace: 'pre-wrap',
+                    overflowWrap: 'break-word',
+                    minHeight: '1.5em',
+                    color: '#A0A0A0',
+                    padding: '8px'
+                  }}
+                  onClick={() => setIsEditing(true)}
+                >
+                  {image.description}
+                </div>
+              ) : (
+                <textarea
+                  value={image.description}
+                  onChange={(e) => onDescriptionChange(e.target.value)}
+                  placeholder="Edit description"
+                  style={{ 
+                    width: `${currentDimensions.width}px`, 
+                    marginTop: '8px',
+                    lineHeight: '1.5', // Match line height
+                    minHeight: '1.5em', // Ensure consistent height
+                    resize: 'none', // Disable manual resizing
+                    overflow: 'hidden', // Hide overflow to prevent scrollbars
+                    fontSize: '0.75rem' // Explicitly set font size to match the div
+                  }}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setIsEditing(false);
+                    }
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto'; // Reset height
+                    target.style.height = `${target.scrollHeight}px`; // Set to scroll height
+                  }}
+                />
+              )
             )}
           </div>
         </div>

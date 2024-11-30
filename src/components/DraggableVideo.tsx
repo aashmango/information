@@ -8,6 +8,7 @@ interface Props extends DraggableProps {
   className?: string;
   onToggleSize?: () => void;
   onDescriptionChange?: (newDescription: string) => void;
+  zoomLevel: number;
 }
 
 export default function DraggableVideo({ 
@@ -17,7 +18,8 @@ export default function DraggableVideo({
   id, 
   className,
   onToggleSize,
-  onDescriptionChange = () => {}
+  onDescriptionChange = () => {},
+  zoomLevel
 }: Props) {
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -59,7 +61,7 @@ export default function DraggableVideo({
       position={position}
       grid={[16, 16]}
       offsetParent={document.body}
-      scale={1}
+      scale={zoomLevel}
       onStart={() => {
         setIsDragging(true);
         bringToFront();
@@ -90,13 +92,13 @@ export default function DraggableVideo({
         <div
           style={{
             transition: 'box-shadow 0.2s ease-in-out',
-            borderRadius: '2px',
-            padding: '8px',
-            border: `1px solid ${isHovered ? '#A0A0A0' : isDragging ? '#E5E5E5' : '#F0F0F0'}`,
+            borderRadius: '10px',
+            border: '1px solid #e5e7eb',
             backgroundColor: 'white',
             boxShadow: isHovered 
-              ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              ? '0 0px 50px rgba(0, 0, 0, 0.15)'
               : 'none',
+            overflow: 'hidden'
           }}
           className="flex flex-col gap-2"
         >

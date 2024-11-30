@@ -41,6 +41,7 @@ interface DatabaseMediaItem {
   default_position_y: number;  // integer
   current_position?: Position; // jsonb
   description?: string;        // text
+  is_expanded?: boolean;       // boolean
   created_at: string;         // timestamp with time zone
   updated_at: string;         // timestamp with time zone
 }
@@ -79,11 +80,13 @@ export interface SavePositionsPayload {
     id: string;
     position: Position;
     description: string;
+    isExpanded: boolean;
   }>;
   videos: Array<{
     id: string;
     position: Position;
     description: string;
+    isExpanded: boolean;
   }>;
   textBlocks: Array<{
     id: string;

@@ -10,6 +10,7 @@ interface Props {
   onPositionChange: (position: Position) => void;
   onTextChange: (newText: string) => void;
   onDelete: () => void;
+  zoomLevel: number;
 }
 
 export default function DraggableText({ 
@@ -17,7 +18,8 @@ export default function DraggableText({
   position, 
   onPositionChange,
   onTextChange,
-  onDelete
+  onDelete,
+  zoomLevel
 }: Props) {
   const nodeRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -57,7 +59,7 @@ export default function DraggableText({
       nodeRef={nodeRef}
       position={position}
       grid={[16, 16]}
-      scale={1}
+      scale={zoomLevel}
       {...dragHandlers}
     >
       <div
@@ -74,11 +76,16 @@ export default function DraggableText({
       >
         <div
           style={{
-            padding: '12px',
+            transition: 'box-shadow 0.2s ease-in-out',
+            borderRadius: '10px',
+            border: '1px solid #e5e7eb',
+            padding: '12px 16px',
             backgroundColor: 'white',
-            borderRadius: '4px',
-            border: `1px solid ${isHovered ? '#A0A0A0' : '#E5E5E5'}`,
-            transition: 'border-color 0.2s ease-in-out',
+            boxShadow: isHovered 
+              ? '0 0px 50px rgba(0, 0, 0, 0.15)'
+              : 'none',
+            overflow: 'hidden',
+
           }}
         >
           {!isEditing ? (
