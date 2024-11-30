@@ -1,29 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import DisplayFilters from './DisplayFilters';
 import Link from 'next/link';
 
 interface ToolbarProps {
-    onCleanupLayout: () => void;
-    onAddTextBlock: () => void;
-    showImages: boolean;
-    showText: boolean;
-    onToggleImages: (show: boolean) => void;
-    onToggleText: (show: boolean) => void;
-    onZoomIn: () => void;
-    onZoomOut: () => void;
-    zoomLevel: number;
+    onAddTextBlock: () => Promise<void>;
 }
 
 export default function Toolbar({
-    onCleanupLayout,
-    onAddTextBlock,
-    showImages,
-    showText,
-    onToggleImages,
-    onToggleText,
-    onZoomIn,
-    onZoomOut,
-    zoomLevel
+    onAddTextBlock
 }: ToolbarProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isFullyExpanded, setIsFullyExpanded] = useState(false);
@@ -31,7 +15,7 @@ export default function Toolbar({
     useEffect(() => {
         let timer: NodeJS.Timeout;
         if (isExpanded) {
-            timer = setTimeout(() => setIsFullyExpanded(true), 250); // Set to fully expanded after 0.5s
+            timer = setTimeout(() => setIsFullyExpanded(true), 250);
         } else {
             setIsFullyExpanded(false);
         }
@@ -47,8 +31,8 @@ export default function Toolbar({
         cursor: 'pointer',
         fontSize: '12px',
         fontWeight: '500',
-        opacity: isFullyExpanded ? 1 : 0, // Opacity changes based on isFullyExpanded
-        transition: 'opacity 0.8s ease', // Transition over 0.5 seconds
+        opacity: isFullyExpanded ? 1 : 0,
+        transition: 'opacity 0.8s ease',
     };
 
     const activeButtonStyle = {
@@ -66,7 +50,7 @@ export default function Toolbar({
 
     const groupStyle = {
         display: 'flex',
-        gap: '4px', // 4px spacing between items in the group
+        gap: '4px',
     };
 
     const toolbarStyle = {
@@ -89,16 +73,6 @@ export default function Toolbar({
         transition: 'max-width 0.5s ease, padding 0.5s ease',
         cursor: 'pointer',
         overflow: 'hidden',
-    };
-
-    const zoomButtonStyle = {
-        ...buttonStyle,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '28px',
-        height: '28px',
-        padding: '0',
     };
 
     const handleMouseEnter = () => {
@@ -141,16 +115,7 @@ export default function Toolbar({
                     >
                         Markdown
                     </Link>
-                    <div style={dividerStyle}></div>
                     <div style={groupStyle}>
-                        <button
-                            onClick={onCleanupLayout}
-                            style={buttonStyle}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                        >
-                            Clean Up
-                        </button>
                         <button
                             onClick={onAddTextBlock}
                             style={buttonStyle}
@@ -158,62 +123,6 @@ export default function Toolbar({
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
                         >
                             Add Text
-                        </button>
-                    </div>
-                    <div style={dividerStyle}></div>
-                    <div style={groupStyle}>
-                        <button
-                            onClick={() => onToggleImages(!showImages)}
-                            style={showImages ? activeButtonStyle : buttonStyle}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = showImages ? '#000' : '#e0e0e0'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = showImages ? '#000' : '#f0f0f0'}
-                        >
-                            Images
-                        </button>
-                        <button
-                            onClick={() => onToggleText(!showText)}
-                            style={showText ? activeButtonStyle : buttonStyle}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = showText ? '#000' : '#e0e0e0'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = showText ? '#000' : '#f0f0f0'}
-                        >
-                            Text
-                        </button>
-                    </div>
-                    <div style={dividerStyle}></div>
-                    <div style={groupStyle}>
-                        <button
-                            onClick={onZoomOut}
-                            style={zoomButtonStyle}
-                            title="Zoom Out (Ctrl -)"
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="11" cy="11" r="8"/>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                                <line x1="8" y1="11" x2="14" y2="11"/>
-                            </svg>
-                        </button>
-                        <span style={{
-                            ...buttonStyle,
-                            minWidth: '60px',
-                            textAlign: 'center' as const
-                        }}>
-                            {Math.round(zoomLevel * 100)}%
-                        </span>
-                        <button
-                            onClick={onZoomIn}
-                            style={zoomButtonStyle}
-                            title="Zoom In (Ctrl +)"
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="11" cy="11" r="8"/>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                                <line x1="11" y1="8" x2="11" y2="14"/>
-                                <line x1="8" y1="11" x2="14" y2="11"/>
-                            </svg>
                         </button>
                     </div>
                 </div>

@@ -9,7 +9,6 @@ interface Props extends DraggableProps {
   className?: string;
   onToggleSize?: () => void;
   onDescriptionChange?: (newDescription: string) => void;
-  zoomLevel: number;
 }
 
 export default function DraggableImage({ 
@@ -20,7 +19,6 @@ export default function DraggableImage({
   className,
   onToggleSize,
   onDescriptionChange = () => {},
-  zoomLevel
 }: Props) {
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -69,7 +67,6 @@ export default function DraggableImage({
       position={position}
       grid={[16, 16]}
       offsetParent={document.body}
-      scale={zoomLevel}
       onStart={() => {
         setIsDragging(true);
         bringToFront(); // Bring to front when starting drag

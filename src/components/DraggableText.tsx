@@ -10,7 +10,6 @@ interface Props {
   onPositionChange: (position: Position) => void;
   onTextChange: (newText: string) => void;
   onDelete: () => void;
-  zoomLevel: number;
 }
 
 export default function DraggableText({ 
@@ -19,7 +18,6 @@ export default function DraggableText({
   onPositionChange,
   onTextChange,
   onDelete,
-  zoomLevel
 }: Props) {
   const nodeRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -59,7 +57,6 @@ export default function DraggableText({
       nodeRef={nodeRef}
       position={position}
       grid={[16, 16]}
-      scale={zoomLevel}
       {...dragHandlers}
     >
       <div

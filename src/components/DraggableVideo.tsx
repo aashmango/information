@@ -8,7 +8,6 @@ interface Props extends DraggableProps {
   className?: string;
   onToggleSize?: () => void;
   onDescriptionChange?: (newDescription: string) => void;
-  zoomLevel: number;
 }
 
 export default function DraggableVideo({ 
@@ -19,7 +18,6 @@ export default function DraggableVideo({
   className,
   onToggleSize,
   onDescriptionChange = () => {},
-  zoomLevel
 }: Props) {
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -61,7 +59,6 @@ export default function DraggableVideo({
       position={position}
       grid={[16, 16]}
       offsetParent={document.body}
-      scale={zoomLevel}
       onStart={() => {
         setIsDragging(true);
         bringToFront();

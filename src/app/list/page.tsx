@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { ImageItem, TextBlock, VideoItem } from '@/types';
 import { contentService } from '@/services/content';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface ListItem {
   id: string;
@@ -69,10 +70,12 @@ export default function ListPage() {
             <div className="flex items-start gap-4">
               {item.thumbnail && (
                 <div className="w-20 h-20 flex-shrink-0">
-                  <img
+                  <Image
                     src={item.thumbnail}
                     alt=""
                     className="w-full h-full object-cover rounded-md"
+                    width={80}
+                    height={80}
                   />
                 </div>
               )}
