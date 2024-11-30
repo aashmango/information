@@ -324,19 +324,22 @@ export default function Home() {
     }, { maxX: 0, maxY: 0, minX: Infinity, minY: Infinity });
   };
 
-  // Then use these bounds to calculate appropriate minimap dimensions
+  // Calculate bounds of all items
   const bounds = getBounds();
   const contentWidth = Math.max(bounds.maxX - bounds.minX, typeof window !== 'undefined' ? window.innerWidth : 0);
   const contentHeight = Math.max(bounds.maxY - bounds.minY, typeof window !== 'undefined' ? window.innerHeight : 0);
+
+  // Calculate a single scale factor based on zoom level
+  const scaleFactor = typeof window !== 'undefined' ? zoomLevel : 1; // Default to 1 for SSR
+
+  // Calculate aspect ratio once
   const aspectRatio = contentWidth / contentHeight;
 
-  // Use a maximum width of 150px for the minimap
-  const minimapWidth = typeof window !== 'undefined' ? window.innerWidth * 0.1 : 500; // Default value for SSR
-  const minimapHeight = minimapWidth / aspectRatio;
+  // Calculate minimap dimensions based on scale factor
+  const minimapWidth = typeof window !== 'undefined' ? (window.innerWidth * 0.1) / scaleFactor : 500; // Adjusted for zoom level
+  const minimapHeight = minimapWidth / aspectRatio; // Maintain aspect ratio
 
   console.log('Minimap Width:', minimapWidth);
-  console.log('WindowWidth:', typeof window !== 'undefined' ? window.innerWidth : 0);
-  console.log('Aspect Ratio:', aspectRatio);
   console.log('Minimap Height:', minimapHeight);
 
   return (
@@ -357,31 +360,19 @@ export default function Home() {
           pointerEvents: 'none', // Allow clicking through to elements underneath
         }}>
           <Minimap
-            images={images.map(img => {
-              const baseWidth = img.isExpanded ? 600 : 300;
-              const mediaHeight = img.isExpanded ? 
-                Math.round(600 * (img.height / img.width)) : 
-                Math.round(300 * (img.height / img.width));
-              const descriptionHeight = calculateDescriptionHeight(img.description);
-              const totalHeight = mediaHeight + descriptionHeight + PADDING;
-              
-              return {
-                ...img,
-                width: baseWidth,
-                aspectRatio: baseWidth / totalHeight
-              };
-            })}
+            images={images.map(img => ({
+              ...img,
+              width: (img.isExpanded ? 600 : 300) * scaleFactor, // Scale width based on zoom level
+              aspectRatio: (img.isExpanded ? 600 : 300) / (Math.round((img.isExpanded ? 600 : 300) * (img.height / img.width)) + calculateDescriptionHeight(img.description) + PADDING)
+            }))}
             videos={videos.map(video => ({
               ...video,
-              width: video.isExpanded ? 600 : 300,
-              aspectRatio: (video.isExpanded ? 600 : 300) / 
-                (Math.round((video.isExpanded ? 600 : 300) * (video.height / video.width)) + 
-                 calculateDescriptionHeight(video.description) + 
-                 PADDING)
+              width: (video.isExpanded ? 600 : 300) * scaleFactor, // Scale width based on zoom level
+              aspectRatio: (video.isExpanded ? 600 : 300) / (Math.round((video.isExpanded ? 600 : 300) * (video.height / video.width)) + calculateDescriptionHeight(video.description) + PADDING)
             }))}
             textBlocks={textBlocks.map(text => ({
               ...text,
-              width: text.width,
+              width: text.width * scaleFactor, // Scale width based on zoom level
               aspectRatio: text.width / DEFAULT_TEXT_HEIGHT
             }))}
             showImages={showImages}

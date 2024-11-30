@@ -30,6 +30,11 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
     }
   }, []);
 
+  useEffect(() => {
+    const farOutImages = images.filter(image => image.current_position.x >= 1000);
+    console.log('Images with x position >= 1000px:', farOutImages);
+  }, [images]);
+
   const getBounds = () => {
     if (typeof window === 'undefined') {
       return { maxX: 0, maxY: 0, minX: 0, minY: 0 };
@@ -89,15 +94,15 @@ export default function Minimap({ images, textBlocks, videos, showImages, showTe
     <div style={minimapStyle}>
       {showImages && images.map(image => {
         const aspectRatio = image.aspectRatio || 1;
-        const width = (image.isExpanded ? 600 : 300) * scale;
+        const width = image.width;
         const height = width / aspectRatio;
         return (
           <div
             key={image.id}
             style={{
               position: 'absolute',
-              left: `${image.current_position.x * scale}px`,
-              top: `${image.current_position.y * scale}px`,
+              left: `${image.current_position.x}px`,
+              top: `${image.current_position.y}px`,
               width: `${width}px`,
               height: `${height}px`,
               backgroundColor: '#d4d4d8',
