@@ -8,9 +8,6 @@ import { ZIndexProvider } from '@/utils/ZIndexContext';
 import { v4 as uuidv4 } from 'uuid';
 import { useContentHandlers } from '@/utils/handlers';
 
-const TOOLBAR_HEIGHT = 40;
-const SPAWN_OFFSET_Y = 100;
-const CANVAS_HEIGHT = 5000;
 const DEFAULT_TEXT_WIDTH = 100;
 
 export default function Home() {
@@ -18,9 +15,8 @@ export default function Home() {
   const [textBlocks, setTextBlocks] = useState<TextBlock[]>([]);
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showText, setShowText] = useState(true);
 
-  const { handlePositionChange } = useContentHandlers(setImages, setVideos, setTextBlocks, setHasUnsavedChanges);
+  const { handlePositionChange, handleDescriptionChange, handleTextChange, handleDeleteText } = useContentHandlers(setImages, setVideos, setTextBlocks, setHasUnsavedChanges);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -52,44 +48,6 @@ export default function Home() {
     loadContent();
   }, []);
 
-  const handleToggleSize = useCallback((id: string, type: 'image' | 'video') => {
-    if (type === 'image') {
-      setImages(prev => prev.map(img =>
-        img.id === id ? { ...img, isExpanded: !img.isExpanded } : img
-      ));
-    } else if (type === 'video') {
-      setVideos(prev => prev.map(video =>
-        video.id === id ? { ...video, isExpanded: !video.isExpanded } : video
-      ));
-    }
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const handleDescriptionChange = useCallback((id: string, newDescription: string) => {
-    setImages(prev => prev.map(img =>
-      img.id === id ? { ...img, description: newDescription } : img
-    ));
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const handleTextChange = (id: string, newContent: string) => {
-    setTextBlocks(prev => prev.map(text =>
-      text.id === id ? { ...text, content: newContent } : text
-    ));
-    setHasUnsavedChanges(true);
-  };
-
-  const handleDeleteText = async (id: string) => {
-    try {
-      await contentService.deleteTextBlock(id);
-      setTextBlocks(prev => prev.filter(text => text.id !== id));
-      setHasUnsavedChanges(true);
-    } catch (error) {
-      console.error('Failed to delete text block:', error);
-      alert('Failed to delete text block');
-    }
-  };
-
   const handleAddTextBlock = () => {
     return new Promise<void>((resolve) => {
       const newTextBlock: TextBlock = {
@@ -105,25 +63,37 @@ export default function Home() {
     });
   };
 
+  const handleToggleSize = (id: string, type: 'image' | 'video') => {
+    if (type === 'video') {
+      setVideos(prevVideos => 
+        prevVideos.map(video => 
+          video.id === id ? { ...video, isExpanded: !video.isExpanded } : video
+        )
+      );
+    } else {
+      setImages(prevImages => 
+        prevImages.map(image => 
+          image.id === id ? { ...image, isExpanded: !image.isExpanded } : image
+        )
+      );
+    }
+  };
+
   return (
     <ZIndexProvider>
       <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
         <Toolbar
           onAddTextBlock={handleAddTextBlock}
-          onToggleSize={handleToggleSize}
-          onDescriptionChange={handleDescriptionChange}
-          onTextChange={handleTextChange}
-          onDeleteText={handleDeleteText}
         />
         <ContentCanvas
           images={images}
           videos={videos}
           textBlocks={textBlocks}
           onPositionChange={handlePositionChange}
-          onToggleSize={handleToggleSize}
           onDescriptionChange={handleDescriptionChange}
           onTextChange={handleTextChange}
           onDeleteText={handleDeleteText}
+          onToggleSize={handleToggleSize}
         />
       </div>
     </ZIndexProvider>

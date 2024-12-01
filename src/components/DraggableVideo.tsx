@@ -53,6 +53,10 @@ export default function DraggableVideo({
     setZIndex(getNextZIndex());
   };
 
+  const handleToggleSize = () => {
+    onToggleSize?.(); // Call the passed function to toggle size
+  };
+
   return (
     <Draggable
       nodeRef={nodeRef}
@@ -121,7 +125,7 @@ export default function DraggableVideo({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    onToggleSize?.();
+                    handleToggleSize(); // Call the toggle size function
                   }}
                   className="!text-xs transition-colors"
                   style={{

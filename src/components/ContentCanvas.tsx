@@ -9,10 +9,10 @@ interface ContentCanvasProps {
   videos: VideoItem[];
   textBlocks: TextBlock[];
   onPositionChange: (id: string, newPosition: Position, type: 'image' | 'text' | 'video') => void;
-  onToggleSize: (id: string, type: 'image' | 'video') => void;
   onDescriptionChange: (id: string, newDescription: string) => void;
   onTextChange: (id: string, newContent: string) => void;
   onDeleteText: (id: string) => void;
+  onToggleSize: (id: string, type: 'image' | 'video') => void;
 }
 
 const ContentCanvas: React.FC<ContentCanvasProps> = ({
@@ -20,10 +20,10 @@ const ContentCanvas: React.FC<ContentCanvasProps> = ({
   videos,
   textBlocks,
   onPositionChange,
-  onToggleSize,
   onDescriptionChange,
   onTextChange,
   onDeleteText,
+  onToggleSize,
 }) => {
   return (
     <main style={{

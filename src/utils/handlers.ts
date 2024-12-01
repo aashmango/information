@@ -39,5 +39,25 @@ export const useContentHandlers = (
     setHasUnsavedChanges(true);
   }, [setImages, setVideos, setTextBlocks, setHasUnsavedChanges]);
 
-  return { handlePositionChange };
+  const handleDescriptionChange = useCallback((id: string, newDescription: string) => {
+    setImages(prev => prev.map(img =>
+      img.id === id ? { ...img, description: newDescription } : img
+    ));
+    setHasUnsavedChanges(true);
+  }, [setImages, setHasUnsavedChanges]);
+
+  const handleTextChange = useCallback((id: string, newContent: string) => {
+    setTextBlocks(prev => prev.map(text =>
+      text.id === id ? { ...text, content: newContent } : text
+    ));
+    setHasUnsavedChanges(true);
+  }, [setTextBlocks, setHasUnsavedChanges]);
+
+  const handleDeleteText = useCallback(async (id: string) => {
+    // Implement the delete logic here, e.g., API call
+    setTextBlocks(prev => prev.filter(text => text.id !== id));
+    setHasUnsavedChanges(true);
+  }, [setTextBlocks, setHasUnsavedChanges]);
+
+  return { handlePositionChange, handleDescriptionChange, handleTextChange, handleDeleteText };
 }; 
